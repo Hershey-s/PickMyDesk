@@ -83,10 +83,6 @@ export default function ShowWorkspace() {
               Home
             </Link>
             <span className="mx-2 text-gray-400">&gt;</span>
-            <Link to={"/"} className="text-gray-600 hover:text-purple-700">
-              Browse Spaces
-            </Link>
-            <span className="mx-2 text-gray-400">&gt;</span>
             <span className="text-purple-700 font-medium">
               {workspace.title}
             </span>
