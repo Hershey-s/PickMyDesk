@@ -35,8 +35,9 @@ export default function AuthForm({ formType }) {
   async function sendData(e) {
     try {
       setIsLoadding(true);
+      const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
       let url = formType === "login" ? "login" : "signup";
-      let response = await axios.post(`http://localhost:5000/${url}`, {
+      let response = await axios.post(`${baseURL}/${url}`, {
         username,
         email,
         password,

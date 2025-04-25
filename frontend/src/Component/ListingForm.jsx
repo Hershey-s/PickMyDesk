@@ -72,15 +72,12 @@ const CreateWorkspace = () => {
       // Add tags to the form data
       data.tags = tags;
       console.log(data);
-      const response = await axios.post(
-        "http://localhost:5000/workspaces",
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const response = await axios.post(`${baseURL}/workspaces`, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       console.log("success===>", response);
       // Show success message
       setSnackbarMessage(response.data.message);
