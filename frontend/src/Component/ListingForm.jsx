@@ -181,7 +181,7 @@ const CreateWorkspace = () => {
         {
           <div className="col-span-3">
             <label htmlFor="listingImage" className="block font-medium text-lg">
-              Upload Image
+              Upload Image Url
             </label>
             <input
               type="text"
