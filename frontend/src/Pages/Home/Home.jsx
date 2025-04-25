@@ -11,8 +11,9 @@ function Home() {
     const fetchWorkspaces = async () => {
       try {
         setLoading(true);
-        baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-        const response = await axios.get(`${baseUrl}/workspaces`);
+        baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/";
+        console.log(baseUrl);
+        const response = await axios.get(`${baseUrl}workspaces`);
         setWorkspaces(response.data);
         setError(null);
       } catch (err) {
