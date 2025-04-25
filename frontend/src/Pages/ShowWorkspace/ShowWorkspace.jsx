@@ -27,7 +27,7 @@ export default function ShowWorkspace() {
   useEffect(() => {
     const fetchWorkspaceDetails = async () => {
       setLoading(true);
-      baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
       try {
         const response = await axios.get(`${baseUrl}/workspaces/${id}`);
 
