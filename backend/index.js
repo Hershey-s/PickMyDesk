@@ -10,6 +10,18 @@ import WorksSpaceRouter from "./router/workspace.router.js";
 const port = 5000;
 const app = express();
 
+// Define CORS options
+const corsOptions = {
+  origin:
+    process.env.NODE_ENV !== "production"
+      ? "http://localhost:5000"
+      : ["https://works-space-hub.onrender.com"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

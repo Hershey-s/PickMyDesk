@@ -12,8 +12,6 @@ export const singUp = async (req, res) => {
 
   const result = await newUser.save();
 
-  console.log(result); // remove me
-
   const token = jwt.sign(
     { userId: result._id, email: result.email, username: result.username },
     process.env.JWT_SECRET_KEY, // Secret key

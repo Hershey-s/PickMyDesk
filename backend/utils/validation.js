@@ -25,7 +25,6 @@ const validateUser = (req, res, next) => {
   });
 
   if (error) {
-    console.log();
     const errorMessage = error.details[0].message;
     return res.status(400).json({
       status: "error",
@@ -108,7 +107,6 @@ const workspaceValidationSchema = Joi.object({
 });
 
 const validateWorkspace = (req, res, next) => {
-  console.log("workspace validation", req.body, req.file);
   const { error } = workspaceValidationSchema.validate(req.body, {
     abortEarly: false,
   });
