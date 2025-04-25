@@ -1,12 +1,21 @@
+import dotenv from "dotenv";
 import mongoose from "mongoose";
-const mongoUrl = "mongodb://127.0.0.1:27017/workspace"; // Replace with your actual MongoDB URL
 
+dotenv.config();
+
+const mongoUrl =
+  process.env.NODE_ENV !== "production"
+    ? "mongodb://127.0.0.1:27017/workspace"
+    : process.env.MONGO_URL;
+
+// MongoDB connection function
 const connectDB = async () => {
   try {
-    await mongoose.connect(mongoUrl);
-    console.log("MongoDB connected successfully");
+    await mongoose.connect(mongoUrl, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
   } catch (err) {
-    console.error("MongoDB connection error:", err.message);
     process.exit(1);
   }
 };
