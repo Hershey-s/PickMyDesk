@@ -62,6 +62,7 @@ function Home() {
               tags={workspace.tags || []}
               price={workspace.price}
               priceUnit={workspace.priceUnit}
+              currency={workspace.currency || "INR"}
               isPopular={workspace.isPopular}
               availableFrom={workspace.availableFrom}
               availableUntil={workspace.availableUntil}

@@ -47,18 +47,25 @@ export default function NavBar() {
     <>
       <header className="h-18">
         <nav
-          className={`flex border border-transparent hover:border-gray-200 justify-between items-center px-2 md:pr-6 py-4 fixed hover:bg-purple-50 right-0 left-0 z-10 
+          className={`flex border border-transparent hover:border-gray-200 justify-between items-center px-2 md:pr-6 py-4 fixed hover:bg-purple-50 right-0 left-0 z-10
             ${scrolled ? "bg-purple-50" : "bg-white"}`}
         >
           <div className="flex pl-3 items-center">
             <h1 className="text-2xl font-extrabold text-black">
-              <NavLink to={"/"}> WorkSpaceHub</NavLink>
+              <NavLink to={"/"} className="flex flex-col">
+                <span className="text-xl font-bold">PickMyDesk</span>
+                <span className="text-xs text-gray-500 -mt-1">Desk booking, simplified</span>
+              </NavLink>
             </h1>
           </div>
 
           {/* Desktop Menu */}
           <div className="hidden lg:flex gap-3">
+            <Button link={"/"} name={"Home"} styles="bg-gray-100" />
             <Button link={"/new"} name={"Create your workspace"} />
+            {isLoggedIn && (
+              <Button link={"/bookings"} name={"My Bookings"} />
+            )}
             {!isLoggedIn ? (
               <>
                 <Button link={"/login"} name={"Log in"} styles="bg-gray-200" />
@@ -107,7 +114,11 @@ export default function NavBar() {
         {/* Mobile Menu Dropdown */}
         {isOpen && (
           <div className="lg:hidden flex flex-col gap-3 bg-white shadow-md absolute top-20 left-0 right-0 p-4 z-10">
+            <Button link={"/"} name={"Home"} styles="bg-gray-100" />
             <Button link={"/new"} name={"Create your workspace"} />
+            {isLoggedIn && (
+              <Button link={"/bookings"} name={"My Bookings"} />
+            )}
             {!isLoggedIn ? (
               <>
                 <Button link={"/login"} name={"Log in"} styles="bg-gray-200" />

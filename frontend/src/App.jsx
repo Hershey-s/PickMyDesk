@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import NavBar from "./Component/NavBar";
+import BackgroundWrapper from "./Component/BackgroundWrapper";
 import Home from "./Pages/Home/Home";
 import Signup from "./Pages/Authentication/Signup";
 import Login from "./Pages/Authentication/Login";
@@ -7,13 +8,34 @@ import Footer from "./Component/Footer";
 import NotFound from "./Component/NotFound";
 import CreateWorkspace from "./Component/ListingForm";
 import ShowWorkspace from "./Pages/ShowWorkspace/ShowWorkspace";
+import WorkspaceBooking from "./Pages/WorkspaceBooking";
+import UserBookings from "./Pages/Bookings/UserBookings";
+import About from "./Pages/About/About";
+import Contact from "./Pages/Contact/Contact";
+import FAQ from "./Pages/FAQ/FAQ";
+import Privacy from "./Pages/Privacy/Privacy";
+import Terms from "./Pages/Terms/Terms";
+import TestFeatures from "./Pages/TestFeatures/TestFeatures";
+import Support from "./Pages/Support/Support";
+import ReportIssue from "./Pages/ReportIssue/ReportIssue";
+import Blog from "./Pages/Blog/Blog";
+import WorkspaceGuide from "./Pages/WorkspaceGuide/WorkspaceGuide";
+import CityGuides from "./Pages/CityGuides/CityGuides";
+import RemoteWorkTips from "./Pages/RemoteWorkTips/RemoteWorkTips";
+import TestBooking from "./Pages/TestBooking/TestBooking";
+import TestBookingManagement from "./Pages/TestBookingManagement/TestBookingManagement";
+import QuickBooking from "./Pages/QuickBooking/QuickBooking";
+import ScrollToTop from "./Component/ScrollToTop";
+import BackToTop from "./Component/BackToTop";
 
-const PageWrapper = ({ children }) => (
-  <>
+const PageWrapper = ({ children, backgroundVariant = 'default' }) => (
+  <BackgroundWrapper variant={backgroundVariant}>
+    <ScrollToTop />
     <NavBar />
     {children}
     <Footer />
-  </>
+    <BackToTop />
+  </BackgroundWrapper>
 );
 
 const routes = [
@@ -30,12 +52,80 @@ const routes = [
     element: <ShowWorkspace />,
   },
   {
+    path: "/book/:id",
+    element: <WorkspaceBooking />,
+  },
+  {
+    path: "/bookings",
+    element: <UserBookings />,
+  },
+  {
     path: "/login",
     element: <Login />,
   },
   {
     path: "/signup",
     element: <Signup />,
+  },
+  {
+    path: "/about",
+    element: <About />,
+  },
+  {
+    path: "/contact",
+    element: <Contact />,
+  },
+  {
+    path: "/faq",
+    element: <FAQ />,
+  },
+  {
+    path: "/privacy",
+    element: <Privacy />,
+  },
+  {
+    path: "/terms",
+    element: <Terms />,
+  },
+  {
+    path: "/test-features",
+    element: <TestFeatures />,
+  },
+  {
+    path: "/support",
+    element: <Support />,
+  },
+  {
+    path: "/report-issue",
+    element: <ReportIssue />,
+  },
+  {
+    path: "/blog",
+    element: <Blog />,
+  },
+  {
+    path: "/workspace-guide",
+    element: <WorkspaceGuide />,
+  },
+  {
+    path: "/city-guides",
+    element: <CityGuides />,
+  },
+  {
+    path: "/remote-work-tips",
+    element: <RemoteWorkTips />,
+  },
+  {
+    path: "/test-booking",
+    element: <TestBooking />,
+  },
+  {
+    path: "/test-booking-management",
+    element: <TestBookingManagement />,
+  },
+  {
+    path: "/quick-booking",
+    element: <QuickBooking />,
   },
   {
     path: "*",
@@ -45,13 +135,24 @@ const routes = [
 
 const authPath = ["/login", "/signup"];
 
+const getBackgroundVariant = (path) => {
+  if (authPath.includes(path)) return 'auth';
+  if (path.includes('/book/')) return 'booking';
+  if (path.includes('/workspace/')) return 'workspace';
+  return 'default';
+};
+
 const router = createBrowserRouter(
   routes.map(({ path, element }) => ({
     path,
     element: authPath.includes(path) ? (
-      element
+      <BackgroundWrapper variant="auth">
+        {element}
+      </BackgroundWrapper>
     ) : (
-      <PageWrapper>{element}</PageWrapper>
+      <PageWrapper backgroundVariant={getBackgroundVariant(path)}>
+        {element}
+      </PageWrapper>
     ),
   }))
 );

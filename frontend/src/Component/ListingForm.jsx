@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 const CreateWorkspace = () => {
   const [preview, setPreview] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarType, setSnackbarType] = useState("success"); // success | error
@@ -17,6 +18,8 @@ const CreateWorkspace = () => {
     register,
     handleSubmit,
     formState: { errors },
+    setError,
+    clearErrors,
     watch,
   } = useForm({
     defaultValues: {
@@ -29,7 +32,6 @@ const CreateWorkspace = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const availableFrom = watch("availableFrom");
-  const selectedFile = watch("listingImage");
 
   useEffect(() => {
     if (!token) {
@@ -40,13 +42,13 @@ const CreateWorkspace = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validTypes = ["image/jpeg", "image/png", "image/gif"];
-      const maxSizeInBytes = 50 * 1024 * 1024; // 50MB
+      const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+      const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
 
       if (!validTypes.includes(file.type)) {
         setError("listingImage", {
           type: "manual",
-          message: "Please upload a valid image file (JPEG, PNG, GIF).",
+          message: "Please upload a valid image file (JPEG, PNG, GIF, WebP).",
         });
         return;
       }
@@ -60,6 +62,9 @@ const CreateWorkspace = () => {
       }
 
       clearErrors("listingImage");
+      setSelectedFile(file);
+
+      // Create preview
       const reader = new FileReader();
       reader.onload = () => setPreview(reader.result);
       reader.readAsDataURL(file);
@@ -69,24 +74,48 @@ const CreateWorkspace = () => {
   const handleSubmitForm = async (data) => {
     try {
       setIsLoading(true);
-      // Add tags to the form data
-      data.tags = tags;
-      console.log(data);
+
+      // Create FormData for file upload
+      const formData = new FormData();
+
+      // Add all form fields
+      Object.keys(data).forEach(key => {
+        if (data[key] !== undefined && data[key] !== null) {
+          formData.append(key, data[key]);
+        }
+      });
+
+      // Add tags
+      formData.append('tags', JSON.stringify(tags));
+
+      // Add image file if selected
+      if (selectedFile) {
+        formData.append('listingImage', selectedFile);
+      } else {
+        // Use a default image URL if no file selected
+        formData.append('listingImage', 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=500');
+      }
+
+      // Add currency field
+      formData.append('currency', 'INR');
+
+      console.log("Submitting form data:", formData);
+
       const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-      const response = await axios.post(`${baseURL}/workspaces`, data, {
+      const response = await axios.post(`${baseURL}/workspaces`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
         },
       });
+
       console.log("success===>", response);
-      // Show success message
-      setSnackbarMessage(response.data.message);
+      setSnackbarMessage(response.data.message || "Workspace created successfully!");
       setSnackbarType("success");
       setOpenSnackbar(true);
       setIsLoading(false);
       navigate("/");
     } catch (error) {
-      // Show error message
       console.log("error===>", error);
       setSnackbarMessage(error.response?.data?.message || "An error occurred");
       setSnackbarType("error");
@@ -177,29 +206,62 @@ const CreateWorkspace = () => {
           )}
         </div>
 
-        {/*Upload Image */}
-        {
-          <div className="col-span-3">
-            <label htmlFor="listingImage" className="block font-medium text-lg">
-              Upload Image Url
-            </label>
+        {/* Upload Image */}
+        <div className="col-span-3">
+          <label htmlFor="listingImage" className="block font-medium text-lg mb-2">
+            Upload Workspace Image
+          </label>
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-400 transition-colors">
             <input
-              type="text"
+              type="file"
               id="listingImage"
-              name="listingImage"
-              {...register("listingImage", {
-                required: "Listing image is required",
-              })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
-              placeholder="e.g., https://example.com/your-image.jpg"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
             />
-            {errors.listingImage && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.listingImage.message}
+            <label
+              htmlFor="listingImage"
+              className="cursor-pointer flex flex-col items-center"
+            >
+              {preview ? (
+                <div className="mb-4">
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    className="max-w-xs max-h-48 rounded-lg shadow-md"
+                  />
+                </div>
+              ) : (
+                <div className="mb-4">
+                  <svg
+                    className="w-12 h-12 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
+                  </svg>
+                </div>
+              )}
+              <p className="text-sm text-gray-600 mb-2">
+                {selectedFile ? selectedFile.name : "Click to upload an image"}
               </p>
-            )}
+              <p className="text-xs text-gray-400">
+                PNG, JPG, GIF, WebP up to 5MB
+              </p>
+            </label>
           </div>
-        }
+          {errors.listingImage && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.listingImage.message}
+            </p>
+          )}
+        </div>
 
         {/* Price */}
         <div className="col-span-3 md:col-span-1">

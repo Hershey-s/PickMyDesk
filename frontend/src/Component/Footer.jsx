@@ -14,7 +14,7 @@ export default function Footer() {
                 <ul className="mt-4 space-y-2">
                   {footerLink.l.map((listLink, idx) => (
                     <li key={idx}>
-                      <Link to="#" className="hover:underline">
+                      <Link to={listLink.link} className="hover:underline">
                         {listLink.text}
                       </Link>
                     </li>
@@ -26,24 +26,44 @@ export default function Footer() {
             <div>
               <h2 className="text-lg font-semibold">CONNECT</h2>
               <div className="flex space-x-4 mt-4">
-                <Link to="#" className="text-xl hover:text-gray-500">
+                <a
+                  href="https://instagram.com/spacebook.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xl hover:text-purple-600 transition-colors"
+                >
                   <Instagram />
-                </Link>
-                <Link to="#" className="text-xl hover:text-gray-500">
+                </a>
+                <a
+                  href="https://facebook.com/spacebook.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xl hover:text-purple-600 transition-colors"
+                >
                   <Facebook />
-                </Link>
-                <Link to="#" className="text-xl hover:text-gray-500">
+                </a>
+                <a
+                  href="https://youtube.com/@spacebook"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xl hover:text-purple-600 transition-colors"
+                >
                   <Youtube />
-                </Link>
-                <Link to="#" className="text-xl hover:text-gray-500">
+                </a>
+                <a
+                  href="https://twitter.com/spacebook_in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xl hover:text-purple-600 transition-colors"
+                >
                   <Twitter />
-                </Link>
+                </a>
               </div>
             </div>
           </div>
 
           <div className="mt-10 border-t pt-6 text-center text-sm text-gray-600">
-            © 2025 WorkSpaceHub ® |
+            © 2025 PickMyDesk ® |
             <Link to="#" className="hover:underline">
               Terms & Privacy
             </Link>

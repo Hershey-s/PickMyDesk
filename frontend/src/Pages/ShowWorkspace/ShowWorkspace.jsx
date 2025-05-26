@@ -3,6 +3,7 @@ import { CheckCircle, CreditCard, Sparkles, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import { formatPrice } from "../../utils/currency";
 
 export default function ShowWorkspace() {
   const [selectedDate, setSelectedDate] = useState(11);
@@ -156,70 +157,31 @@ export default function ShowWorkspace() {
           </div>
         </div>
 
-        {/* Available Space Types */}
+        {/* Main Workspace Booking */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4">Available space types</h2>
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="border border-gray-200 rounded-lg p-4">
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-semibold">Hot Desk</h3>
-                <span className="text-lg font-semibold">
-                  $30 <span className="text-sm text-gray-500">/hour</span>
-                </span>
+          <h2 className="text-xl font-bold mb-4">Book This Workspace</h2>
+          <div className="border border-gray-200 rounded-lg p-6">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="text-xl font-semibold">{workspace.title}</h3>
+                <p className="text-gray-600">{workspace.location}, {workspace.country}</p>
               </div>
-              <p className="text-sm text-gray-600 mb-4">
-                Flexible workspace in our open area. First come, first served.
-                Includes all basic amenities.
-              </p>
-              <button className="w-full bg-purple-700 hover:bg-purple-800 text-white py-2 rounded-lg">
-                Book Hot Desk
-              </button>
-            </div>
-            <div className="border border-gray-200 rounded-lg p-4">
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-semibold">Dedicated Desk</h3>
-                <span className="text-lg font-semibold">
-                  $50 <span className="text-sm text-gray-500">/hour</span>
+              <div className="text-right">
+                <span className="text-2xl font-bold text-purple-700">
+                  {formatPrice(workspace.price, workspace.currency || 'INR')}
                 </span>
+                <span className="text-gray-500 ml-1">/{workspace.priceUnit}</span>
               </div>
-              <p className="text-sm text-gray-600 mb-4">
-                Your own personal desk in our coworking space. Reserved for you
-                all day. Storage included.
-              </p>
-              <button className="w-full bg-purple-700 hover:bg-purple-800 text-white py-2 rounded-lg">
-                Book Dedicated Desk
-              </button>
             </div>
-            <div className="border border-gray-200 rounded-lg p-4">
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-semibold">Meeting Room</h3>
-                <span className="text-lg font-semibold">
-                  $75 <span className="text-sm text-gray-500">/hour</span>
-                </span>
-              </div>
-              <p className="text-sm text-gray-600 mb-4">
-                Private meeting room with video conferencing setup. Capacity for
-                up to 8 people.
-              </p>
-              <button className="w-full bg-purple-700 hover:bg-purple-800 text-white py-2 rounded-lg">
-                Book Meeting Room
-              </button>
-            </div>
-            <div className="border border-gray-200 rounded-lg p-4">
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-semibold">Private Office</h3>
-                <span className="text-lg font-semibold">
-                  $100 <span className="text-sm text-gray-500">/hour</span>
-                </span>
-              </div>
-              <p className="text-sm text-gray-600 mb-4">
-                Enclosed office for ultimate privacy. Fits up to 4 people.
-                Includes whiteboard and TV.
-              </p>
-              <button className="w-full bg-purple-700 hover:bg-purple-800 text-white py-2 rounded-lg">
-                Book Private Office
-              </button>
-            </div>
+            <p className="text-gray-600 mb-4">
+              {workspace.description}
+            </p>
+            <Link
+              to={`/book/${workspace._id}`}
+              className="w-full bg-purple-700 hover:bg-purple-800 text-white py-3 rounded-lg font-medium text-center block"
+            >
+              Book Now - {formatPrice(workspace.price, workspace.currency || 'INR')} per {workspace.priceUnit}
+            </Link>
           </div>
         </div>
 

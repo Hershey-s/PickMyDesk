@@ -58,6 +58,11 @@ const workspaceSchema = new mongoose.Schema(
       min: 1, // Price can't be negative
       max: 200000,
     },
+    currency: {
+      type: String,
+      enum: ["USD", "INR", "EUR", "GBP"],
+      default: "INR",
+    },
     isPopular: {
       type: Boolean,
       default: false,
@@ -85,6 +90,53 @@ const workspaceSchema = new mongoose.Schema(
           return value > this.availableFrom; // Ensure "availableUntil" is after "availableFrom"
         },
       },
+    },
+    // Booking-related fields
+    maxCapacity: {
+      type: Number,
+      default: 1,
+      min: 1,
+    },
+    amenities: {
+      type: [String],
+      default: [],
+    },
+    availability: {
+      type: {
+        monday: { start: String, end: String, available: Boolean },
+        tuesday: { start: String, end: String, available: Boolean },
+        wednesday: { start: String, end: String, available: Boolean },
+        thursday: { start: String, end: String, available: Boolean },
+        friday: { start: String, end: String, available: Boolean },
+        saturday: { start: String, end: String, available: Boolean },
+        sunday: { start: String, end: String, available: Boolean },
+      },
+      default: {
+        monday: { start: "09:00", end: "18:00", available: true },
+        tuesday: { start: "09:00", end: "18:00", available: true },
+        wednesday: { start: "09:00", end: "18:00", available: true },
+        thursday: { start: "09:00", end: "18:00", available: true },
+        friday: { start: "09:00", end: "18:00", available: true },
+        saturday: { start: "10:00", end: "16:00", available: true },
+        sunday: { start: "10:00", end: "16:00", available: false },
+      }
+    },
+    instantBooking: {
+      type: Boolean,
+      default: true,
+    },
+    cancellationPolicy: {
+      type: String,
+      enum: ["flexible", "moderate", "strict"],
+      default: "moderate",
+    },
+    minimumBookingDuration: {
+      type: Number,
+      default: 1, // 1 hour or 1 day depending on priceUnit
+    },
+    maximumBookingDuration: {
+      type: Number,
+      default: 30, // 30 hours or 30 days depending on priceUnit
     },
   },
   { timestamps: true }

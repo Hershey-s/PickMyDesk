@@ -1,5 +1,6 @@
 import { Star } from "lucide-react";
 import { Link } from "react-router-dom";
+import { formatPrice } from "../utils/currency";
 
 function WorkspaceCard({
   id,
@@ -11,13 +12,12 @@ function WorkspaceCard({
   tags = ["Private Office", "24/7 Access", "Printing"],
   price = 45,
   priceUnit = "hour",
+  currency = "INR",
   isPopular = true,
 }) {
   return (
     <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-2 hover:scale-105 transition-transform duration-300">
-      <Link to={`/workspace/${id}`}>
-        {" "}
-        <div className="h-full rounded-lg overflow-hidden shadow-md bg-white transition-shadow duration-300 hover:shadow-lg">
+      <div className="h-full rounded-lg overflow-hidden shadow-md bg-white transition-shadow duration-300 hover:shadow-lg">
           {/* Image section */}
           <div
             className="relative h-48 bg-gray-200"
@@ -67,16 +67,26 @@ function WorkspaceCard({
 
             <div className="flex justify-between items-center">
               <div>
-                <span className="font-bold text-lg">${price}</span>
+                <span className="font-bold text-lg">{formatPrice(price, currency)}</span>
                 <span className="text-gray-500"> / {priceUnit}</span>
               </div>
-              <button className="text-purple-600 font-medium hover:underline">
-                View Details
-              </button>
+              <div className="flex gap-2">
+                <Link
+                  to={`/workspace/${id}`}
+                  className="text-gray-600 font-medium hover:underline text-sm"
+                >
+                  View Details
+                </Link>
+                <Link
+                  to={`/book/${id}`}
+                  className="bg-purple-700 hover:bg-purple-800 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
+                >
+                  Book Now
+                </Link>
+              </div>
             </div>
           </div>
         </div>
-      </Link>
     </div>
   );
 }

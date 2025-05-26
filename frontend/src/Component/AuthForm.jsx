@@ -9,6 +9,7 @@ import googleLogo from "../assets/google-logo.webp";
 import axios from "axios";
 import Or from "../CommonComponent/Or";
 import FormError from "../CommonComponent/FormError";
+// import useGoogleAuth from "../hooks/useGoogleAuth";
 
 export default function AuthForm({ formType }) {
   const [open, setOpen] = useState(false);
@@ -19,6 +20,7 @@ export default function AuthForm({ formType }) {
   const [isLoadding, setIsLoadding] = useState(false);
   const [serverError, setServerError] = useState("");
   const navigate = useNavigate();
+  const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
   const {
     register,
     handleSubmit,
@@ -30,33 +32,130 @@ export default function AuthForm({ formType }) {
     if (token) {
       navigate("/");
     }
+
+    // Check if Google is loaded
+    const checkGoogleLoaded = () => {
+      if (window.google && window.google.accounts) {
+        setIsGoogleLoaded(true);
+      } else {
+        setTimeout(checkGoogleLoaded, 100);
+      }
+    };
+    checkGoogleLoaded();
   }, []);
 
   async function sendData(e) {
     try {
       setIsLoadding(true);
+      setServerError(""); // Clear previous errors
       const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
       let url = formType === "login" ? "login" : "signup";
+
+      console.log("Sending request to:", `${baseURL}/${url}`);
+      console.log("Data:", { username, email, password: "***" });
+
       let response = await axios.post(`${baseURL}/${url}`, {
         username,
         email,
         password,
       });
+
+      console.log("Response:", response.data);
+
       if (response.data.message) {
         setMessage(response.data.message);
         setOpen(true);
       }
-      if (response.data.message && response.data.token) {
+      if (response.data.token) {
         localStorage.setItem("token", response.data.token);
+        console.log("Token saved to localStorage");
+        setTimeout(() => {
+          navigate("/");
+        }, 1000); // Small delay to show success message
       }
 
       setIsLoadding(false);
-      navigate("/");
     } catch (err) {
-      setServerError(err.response.data.message);
+      console.error("Auth error:", err);
+      setServerError(err.response?.data?.message || "An error occurred");
       setIsLoadding(false);
     }
   }
+
+  const handleGoogleSignIn = () => {
+    console.log("Google sign-in button clicked");
+
+    // Check if Google is loaded
+    if (!window.google) {
+      setServerError("Google services not loaded. Please refresh the page.");
+      return;
+    }
+
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    console.log("Client ID:", clientId);
+
+    if (!clientId || clientId === 'your_google_client_id_here') {
+      setServerError("Google Client ID not configured properly.");
+      return;
+    }
+
+    try {
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: async (response) => {
+          console.log("Google response:", response);
+          try {
+            const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+            const result = await axios.post(`${baseURL}/auth/google`, {
+              token: response.credential
+            });
+
+            console.log("Backend response:", result.data);
+
+            if (result.data.token) {
+              localStorage.setItem("token", result.data.token);
+              setMessage(result.data.message);
+              setOpen(true);
+              setTimeout(() => {
+                navigate("/");
+              }, 1000);
+            }
+          } catch (error) {
+            console.error("Google auth error:", error);
+            setServerError(error.response?.data?.message || "Google authentication failed");
+          }
+        },
+        auto_select: false,
+        cancel_on_tap_outside: true,
+        use_fedcm_for_prompt: false
+      });
+
+      // Try using renderButton instead of prompt for better compatibility
+      const buttonDiv = document.createElement('div');
+      buttonDiv.id = 'google-signin-button-temp';
+      document.body.appendChild(buttonDiv);
+
+      window.google.accounts.id.renderButton(buttonDiv, {
+        theme: 'outline',
+        size: 'large',
+        text: 'signin_with',
+        width: 300
+      });
+
+      // Trigger click on the rendered button
+      setTimeout(() => {
+        const googleButton = buttonDiv.querySelector('div[role="button"]');
+        if (googleButton) {
+          googleButton.click();
+        }
+        document.body.removeChild(buttonDiv);
+      }, 100);
+
+    } catch (error) {
+      console.error("Error initializing Google Sign-In:", error);
+      setServerError("Failed to initialize Google Sign-In: " + error.message);
+    }
+  };
 
   return (
     <div className="flex justify-center items-center  min-h-screen bg-purple-50 ">
@@ -64,9 +163,24 @@ export default function AuthForm({ formType }) {
         <h2 className="text-black text-3xl font-semibold flex justify-center items-center gap-2 mb-4">
           {formType === "login" ? "🦚 Welcome back" : "🙏 Let's get started"}
         </h2>
-        <button className=" w-full flex items-center mb-2 justify-center gap-1 bg-gray-200 text-black px-4 py-2.5 rounded-full font-medium hover:bg-gray-300  ">
-          <img src={googleLogo} alt="Google Logo" className="w-8 h-8 " />
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          disabled={!isGoogleLoaded}
+          className={`w-full flex items-center mb-2 justify-center gap-1 px-4 py-2.5 rounded-full font-medium transition-colors ${
+            isGoogleLoaded
+              ? "bg-gray-200 text-black hover:bg-gray-300 cursor-pointer"
+              : "bg-gray-100 text-gray-400 cursor-not-allowed"
+          }`}
+          title={!isGoogleLoaded ? "Loading Google services..." : "Sign in with Google"}
+        >
+          <img
+            src={googleLogo}
+            alt="Google Logo"
+            className={`w-8 h-8 ${!isGoogleLoaded ? "opacity-50" : ""}`}
+          />
           {formType === "login" ? "Log in" : "Sign Up"} with Google
+          {!isGoogleLoaded && " (Loading...)"}
         </button>
         <Or />
         <form onSubmit={handleSubmit(sendData)}>
@@ -91,7 +205,7 @@ export default function AuthForm({ formType }) {
                   })}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Eg: Username"
-                  className={`border border-gray-400 focus:outline-none w-full px-4 py-3 rounded-full bg-white/80 text-black 
+                  className={`border border-gray-400 focus:outline-none w-full px-4 py-3 rounded-full bg-white/80 text-black
                               transition-colors duration-300 ${
                                 errors.username
                                   ? "border-red-500"
@@ -126,7 +240,7 @@ export default function AuthForm({ formType }) {
                 })}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@gmail.com"
-                className={`border border-gray-400  focus:outline-none w-full px-4  py-3 rounded-full bg-white/80 text-black 
+                className={`border border-gray-400  focus:outline-none w-full px-4  py-3 rounded-full bg-white/80 text-black
                   transition-colors duration-300    ${
                     errors.email
                       ? "border-red-500"
@@ -135,7 +249,7 @@ export default function AuthForm({ formType }) {
               />
               {errors.email && (
                 <FormError
-                  styles={"text - sm"}
+                  styles={"text-sm"}
                   errorsMessage={errors.email.message}
                 />
               )}
@@ -159,7 +273,7 @@ export default function AuthForm({ formType }) {
                   },
                 })}
                 onChange={(e) => setPassword(e.target.value)}
-                className={`border border-gray-400  focus:outline-none  w-full px-4 py-3 rounded-full bg-white/80 text-black  
+                className={`border border-gray-400  focus:outline-none  w-full px-4 py-3 rounded-full bg-white/80 text-black
                   transition-colors duration-300  ${
                     errors.password
                       ? "border-red-500"
@@ -168,7 +282,7 @@ export default function AuthForm({ formType }) {
               />
               {errors.password && (
                 <FormError
-                  styles={"text - sm"}
+                  styles={"text-sm"}
                   errorsMessage={errors.password.message}
                 />
               )}

@@ -120,4 +120,72 @@ const validateWorkspace = (req, res, next) => {
   next();
 };
 
-export { validateUser, validateWorkspace };
+// Booking validation schema
+const bookingValidationSchema = Joi.object({
+  workspaceId: Joi.string().required().messages({
+    "string.empty": "Workspace ID is required",
+    "any.required": "Workspace ID is required",
+  }),
+  startDate: Joi.date().required().messages({
+    "any.required": "Start date is required",
+    "date.base": "Start date must be a valid date",
+  }),
+  endDate: Joi.date().min(Joi.ref('startDate')).required().messages({
+    "date.min": "End date must be on or after start date",
+    "any.required": "End date is required",
+    "date.base": "End date must be a valid date",
+  }),
+  startTime: Joi.string().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).allow('').optional().messages({
+    "string.pattern.base": "Start time must be in HH:MM format",
+  }),
+  endTime: Joi.string().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).allow('').optional().messages({
+    "string.pattern.base": "End time must be in HH:MM format",
+  }),
+  guestCount: Joi.number().integer().min(1).max(50).default(1).messages({
+    "number.min": "Guest count must be at least 1",
+    "number.max": "Guest count cannot exceed 50",
+    "number.base": "Guest count must be a number",
+  }),
+  specialRequests: Joi.string().max(500).allow('').optional().messages({
+    "string.max": "Special requests cannot exceed 500 characters",
+  }),
+  contactInfo: Joi.object({
+    phone: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/).allow('').optional().messages({
+      "string.pattern.base": "Phone number must be a valid international format (e.g., +911234567890)",
+    }),
+    phoneCountry: Joi.string().length(2).allow('').optional(),
+    email: Joi.string().email().allow('').optional().messages({
+      "string.email": "Please enter a valid email address",
+    }),
+  }).optional(),
+});
+
+// Middleware to validate booking data
+const validateBooking = (req, res, next) => {
+  console.log("🔍 Validating booking data:", req.body);
+
+  const { error, value } = bookingValidationSchema.validate(req.body, {
+    abortEarly: false,
+    allowUnknown: false,
+    stripUnknown: true
+  });
+
+  if (error) {
+    console.log("❌ Validation failed:", error.details);
+    return res.status(400).json({
+      message: "Validation error",
+      details: error.details.map((detail) => detail.message),
+      field_errors: error.details.reduce((acc, detail) => {
+        acc[detail.path.join('.')] = detail.message;
+        return acc;
+      }, {})
+    });
+  }
+
+  // Use validated and cleaned data
+  req.body = value;
+  console.log("✅ Validation passed:", value);
+  next();
+};
+
+export { validateUser, validateWorkspace, validateBooking };
