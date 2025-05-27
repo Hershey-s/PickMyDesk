@@ -4,8 +4,6 @@ export const footerSections = [
     l: [
       { text: "FAQ", link: "/faq" },
       { text: "Contact us", link: "/contact" },
-      { text: "Privacy Policy", link: "/privacy" },
-      { text: "Terms of Service", link: "/terms" },
       { text: "Support", link: "/support" },
       { text: "Report Issue", link: "/report-issue" },
     ],
@@ -14,11 +12,8 @@ export const footerSections = [
     h: "COMPANY",
     l: [
       { text: "About", link: "/about" },
-      { text: "Pricing", link: "/pricing" },
-      { text: "For Workspace Owners", link: "/list-space" },
-      { text: "Partnerships", link: "/contact" },
-      { text: "Careers", link: "/careers" },
-      { text: "Press", link: "/press" },
+      { text: "For Workspace Owners", link: "/new" },
+      { text: "Contact", link: "/contact" },
     ],
   },
   {
@@ -26,9 +21,13 @@ export const footerSections = [
     l: [
       { text: "Blog", link: "/blog" },
       { text: "Workspace Guide", link: "/workspace-guide" },
-      { text: "City Guides", link: "/city-guides" },
-      { text: "Remote Work Tips", link: "/remote-work-tips" },
-      { text: "Mobile App", link: "/app" },
+    ],
+  },
+  {
+    h: "LEGAL",
+    l: [
+      { text: "Privacy Policy", link: "/privacy" },
+      { text: "Terms of Service", link: "/terms" },
     ],
   },
 ];

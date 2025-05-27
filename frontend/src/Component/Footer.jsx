@@ -1,4 +1,4 @@
-import { Instagram, Facebook, Youtube, Twitter } from "lucide-react";
+import { Instagram, Facebook, Youtube, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { footerSections } from "../Constant/footer.js";
 
@@ -27,7 +27,7 @@ export default function Footer() {
               <h2 className="text-lg font-semibold">CONNECT</h2>
               <div className="flex space-x-4 mt-4">
                 <a
-                  href="https://instagram.com/spacebook.in"
+                  href="https://instagram.com/pickmydesk"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xl hover:text-purple-600 transition-colors"
@@ -35,7 +35,7 @@ export default function Footer() {
                   <Instagram />
                 </a>
                 <a
-                  href="https://facebook.com/spacebook.in"
+                  href="https://facebook.com/pickmydesk"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xl hover:text-purple-600 transition-colors"
@@ -43,7 +43,7 @@ export default function Footer() {
                   <Facebook />
                 </a>
                 <a
-                  href="https://youtube.com/@spacebook"
+                  href="https://youtube.com/@pickmydesk"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xl hover:text-purple-600 transition-colors"
@@ -51,12 +51,12 @@ export default function Footer() {
                   <Youtube />
                 </a>
                 <a
-                  href="https://twitter.com/spacebook_in"
+                  href="https://twitter.com/pickmydesk"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xl hover:text-purple-600 transition-colors"
                 >
-                  <Twitter />
+                  <X />
                 </a>
               </div>
             </div>
