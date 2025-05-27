@@ -1,20 +1,21 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
-import { 
-  Container, 
-  Grid, 
-  Typography, 
-  Card, 
-  CardMedia, 
+import {
+  Container,
+  Grid,
+  Typography,
+  Card,
+  CardMedia,
   CardContent,
   Box,
   Chip,
   Breadcrumbs,
   CircularProgress,
-  Alert
+  Alert,
 } from "@mui/material";
 import BookingForm from "../Component/BookingForm";
+import { formatPrice } from "../utils/currency";
 
 export default function WorkspaceBooking() {
   const { id } = useParams();
@@ -88,9 +89,10 @@ export default function WorkspaceBooking() {
               <Typography variant="h4" gutterBottom>
                 {workspace.title}
               </Typography>
-              
+
               <Typography variant="h6" color="primary" gutterBottom>
-                ${workspace.price} per {workspace.priceUnit}
+                {formatPrice(workspace.price, workspace.currency || "INR")} per{" "}
+                {workspace.priceUnit}
               </Typography>
 
               <Typography variant="body1" color="text.secondary" gutterBottom>
@@ -120,7 +122,7 @@ export default function WorkspaceBooking() {
                 <Typography variant="subtitle2" gutterBottom>
                   Workspace Details:
                 </Typography>
-                
+
                 {workspace.maxCapacity && (
                   <Typography variant="body2">
                     👥 Maximum Capacity: {workspace.maxCapacity} people
@@ -141,7 +143,8 @@ export default function WorkspaceBooking() {
 
                 {workspace.minimumBookingDuration && (
                   <Typography variant="body2">
-                    ⏱️ Minimum Booking: {workspace.minimumBookingDuration} {workspace.priceUnit}(s)
+                    ⏱️ Minimum Booking: {workspace.minimumBookingDuration}{" "}
+                    {workspace.priceUnit}(s)
                   </Typography>
                 )}
               </Box>
@@ -154,11 +157,11 @@ export default function WorkspaceBooking() {
                   </Typography>
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                     {workspace.amenities.map((amenity, index) => (
-                      <Chip 
-                        key={index} 
-                        label={amenity} 
-                        variant="outlined" 
-                        size="small" 
+                      <Chip
+                        key={index}
+                        label={amenity}
+                        variant="outlined"
+                        size="small"
                       />
                     ))}
                   </Box>
@@ -171,15 +174,16 @@ export default function WorkspaceBooking() {
                   <Typography variant="subtitle2" gutterBottom>
                     Operating Hours:
                   </Typography>
-                  {Object.entries(workspace.availability).map(([day, schedule]) => (
-                    <Typography key={day} variant="body2">
-                      {day.charAt(0).toUpperCase() + day.slice(1)}: {
-                        schedule.available 
+                  {Object.entries(workspace.availability).map(
+                    ([day, schedule]) => (
+                      <Typography key={day} variant="body2">
+                        {day.charAt(0).toUpperCase() + day.slice(1)}:{" "}
+                        {schedule.available
                           ? `${schedule.start} - ${schedule.end}`
-                          : "Closed"
-                      }
-                    </Typography>
-                  ))}
+                          : "Closed"}
+                      </Typography>
+                    )
+                  )}
                 </Box>
               )}
             </CardContent>

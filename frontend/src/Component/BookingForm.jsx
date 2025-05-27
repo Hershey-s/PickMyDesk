@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import PhoneInput from 'react-phone-input-2';
-import 'react-phone-input-2/lib/style.css';
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 import { formatPrice } from "../utils/currency";
 
 // Utility function to format time to AM/PM
 const formatTimeToAMPM = (time24) => {
-  if (!time24) return '';
-  const [hours, minutes] = time24.split(':');
+  if (!time24) return "";
+  const [hours, minutes] = time24.split(":");
   const hour24 = parseInt(hours, 10);
   const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
-  const ampm = hour24 >= 12 ? 'PM' : 'AM';
+  const ampm = hour24 >= 12 ? "PM" : "AM";
   return `${hour12}:${minutes} ${ampm}`;
 };
 import {
@@ -23,22 +23,22 @@ import {
   Box,
   Alert,
   CircularProgress,
-  Divider
+  Divider,
 } from "@mui/material";
 
 export default function BookingForm({ workspace }) {
   const [formData, setFormData] = useState({
     startDate: "",
     endDate: "",
-    startTime: "",
-    endTime: "",
+    startTime: "09:00", // Default to 9:00 AM
+    endTime: "17:00", // Default to 5:00 PM
     guestCount: 1,
     specialRequests: "",
     contactInfo: {
       phone: "",
       phoneCountry: "in", // Default to India
-      email: ""
-    }
+      email: "",
+    },
   });
 
   const [loading, setLoading] = useState(false);
@@ -55,16 +55,25 @@ export default function BookingForm({ workspace }) {
     if (formData.startDate && formData.endDate) {
       calculatePrice();
     }
-  }, [formData.startDate, formData.endDate, formData.startTime, formData.endTime]);
+  }, [
+    formData.startDate,
+    formData.endDate,
+    formData.startTime,
+    formData.endTime,
+  ]);
 
   const calculatePrice = () => {
     if (!workspace) return;
 
     let duration = 0;
 
-    if (workspace.priceUnit === 'hour' && formData.startTime && formData.endTime) {
-      const startHour = parseInt(formData.startTime.split(':')[0]);
-      const endHour = parseInt(formData.endTime.split(':')[0]);
+    if (
+      workspace.priceUnit === "hour" &&
+      formData.startTime &&
+      formData.endTime
+    ) {
+      const startHour = parseInt(formData.startTime.split(":")[0]);
+      const endHour = parseInt(formData.endTime.split(":")[0]);
       duration = endHour - startHour;
     } else {
       const start = new Date(formData.startDate);
@@ -84,8 +93,8 @@ export default function BookingForm({ workspace }) {
         endDate: formData.endDate,
       });
 
-      if (formData.startTime) params.append('startTime', formData.startTime);
-      if (formData.endTime) params.append('endTime', formData.endTime);
+      if (formData.startTime) params.append("startTime", formData.startTime);
+      if (formData.endTime) params.append("endTime", formData.endTime);
 
       const response = await axios.get(
         `${baseURL}/workspaces/${workspace._id}/availability?${params}`
@@ -101,31 +110,31 @@ export default function BookingForm({ workspace }) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setFormData(prev => ({
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
+      setFormData((prev) => ({
         ...prev,
         [parent]: {
           ...prev[parent],
-          [child]: value
-        }
+          [child]: value,
+        },
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
   };
 
   const handlePhoneChange = (value, country) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       contactInfo: {
         ...prev.contactInfo,
         phone: value,
-        phoneCountry: country.countryCode
-      }
+        phoneCountry: country.countryCode,
+      },
     }));
   };
 
@@ -181,8 +190,8 @@ export default function BookingForm({ workspace }) {
       const response = await axios.post(`${baseURL}/bookings`, cleanedData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
+          "Content-Type": "application/json",
+        },
       });
 
       setSuccess("Booking created successfully!");
@@ -191,7 +200,6 @@ export default function BookingForm({ workspace }) {
       setTimeout(() => {
         navigate("/bookings");
       }, 2000);
-
     } catch (error) {
       console.error("Booking error:", error);
       setError(error.response?.data?.message || "Failed to create booking");
@@ -203,7 +211,7 @@ export default function BookingForm({ workspace }) {
   const getTomorrowDate = () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
+    return tomorrow.toISOString().split("T")[0];
   };
 
   if (!workspace) {
@@ -218,14 +226,14 @@ export default function BookingForm({ workspace }) {
         </Typography>
 
         <Typography variant="body2" color="text.secondary" gutterBottom>
-          {formatPrice(workspace.price, workspace.currency)} per {workspace.priceUnit}
+          {formatPrice(workspace.price, workspace.currency)} per{" "}
+          {workspace.priceUnit}
         </Typography>
 
         <Divider sx={{ my: 2 }} />
 
         <form onSubmit={handleSubmit}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-
             {/* Date Selection */}
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField
@@ -255,43 +263,43 @@ export default function BookingForm({ workspace }) {
             </Box>
 
             {/* Time Selection (for hourly bookings) */}
-            {workspace.priceUnit === 'hour' && (
+            {workspace.priceUnit === "hour" && (
               <Box sx={{ display: "flex", gap: 2 }}>
                 <Box sx={{ flex: 1 }}>
                   <TextField
-                    label="Start Time"
+                    label="Start Time (AM)"
                     type="time"
                     name="startTime"
                     value={formData.startTime}
                     onChange={handleInputChange}
                     InputLabelProps={{ shrink: true }}
                     inputProps={{ step: 300 }} // 5 min intervals
+                    helperText={
+                      formData.startTime
+                        ? formatTimeToAMPM(formData.startTime)
+                        : "Default: 9:00 AM"
+                    }
                     required
                     fullWidth
                   />
-                  {formData.startTime && (
-                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                      {formatTimeToAMPM(formData.startTime)}
-                    </Typography>
-                  )}
                 </Box>
                 <Box sx={{ flex: 1 }}>
                   <TextField
-                    label="End Time"
+                    label="End Time (PM)"
                     type="time"
                     name="endTime"
                     value={formData.endTime}
                     onChange={handleInputChange}
                     InputLabelProps={{ shrink: true }}
                     inputProps={{ step: 300 }} // 5 min intervals
+                    helperText={
+                      formData.endTime
+                        ? formatTimeToAMPM(formData.endTime)
+                        : "Default: 5:00 PM"
+                    }
                     required
                     fullWidth
                   />
-                  {formData.endTime && (
-                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                      {formatTimeToAMPM(formData.endTime)}
-                    </Typography>
-                  )}
                 </Box>
               </Box>
             )}
@@ -310,7 +318,10 @@ export default function BookingForm({ workspace }) {
 
             {/* Contact Information */}
             <Box>
-              <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
+              <Typography
+                variant="body2"
+                sx={{ mb: 1, color: "text.secondary" }}
+              >
                 Phone Number (with country code)
               </Typography>
               <PhoneInput
@@ -318,38 +329,38 @@ export default function BookingForm({ workspace }) {
                 value={formData.contactInfo.phone}
                 onChange={handlePhoneChange}
                 inputStyle={{
-                  width: '100%',
-                  height: '56px',
-                  fontSize: '16px',
-                  border: '1px solid #c4c4c4',
-                  borderRadius: '4px',
-                  paddingLeft: '48px'
+                  width: "100%",
+                  height: "56px",
+                  fontSize: "16px",
+                  border: "1px solid #c4c4c4",
+                  borderRadius: "4px",
+                  paddingLeft: "48px",
                 }}
                 containerStyle={{
-                  width: '100%'
+                  width: "100%",
                 }}
                 buttonStyle={{
-                  border: '1px solid #c4c4c4',
-                  borderRadius: '4px 0 0 4px'
+                  border: "1px solid #c4c4c4",
+                  borderRadius: "4px 0 0 4px",
                 }}
                 dropdownStyle={{
-                  maxHeight: '150px'
+                  maxHeight: "150px",
                 }}
                 searchStyle={{
-                  margin: '0',
-                  width: '97%',
-                  height: '30px'
+                  margin: "0",
+                  width: "97%",
+                  height: "30px",
                 }}
                 enableSearch={true}
                 disableSearchIcon={true}
                 placeholder="Enter phone number"
-                preferredCountries={['in', 'us', 'gb', 'ca', 'au']}
+                preferredCountries={["in", "us", "gb", "ca", "au"]}
                 priority={{
                   in: 0,
                   us: 1,
                   gb: 2,
                   ca: 3,
-                  au: 4
+                  au: 4,
                 }}
               />
             </Box>
