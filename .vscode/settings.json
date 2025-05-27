@@ -1,0 +1,24 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact"
+  },
+  "files.associations": {
+    "*.jsx": "javascriptreact"
+  },
+  "terminal.integrated.defaultProfile.windows": "Command Prompt",
+  "terminal.integrated.profiles.windows": {
+    "Command Prompt": {
+      "path": "C:\\Windows\\System32\\cmd.exe",
+      "args": []
+    },
+    "PowerShell": {
+      "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "args": []
+    }
+  }
+}

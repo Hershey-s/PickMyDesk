@@ -1,0 +1,67 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Backend",
+      "type": "shell",
+      "command": "npm start",
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Start Frontend",
+      "type": "shell",
+      "command": "npm run dev",
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Install Backend Dependencies",
+      "type": "shell",
+      "command": "npm install",
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      }
+    },
+    {
+      "label": "Install Frontend Dependencies",
+      "type": "shell",
+      "command": "npm install",
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      }
+    },
+    {
+      "label": "Install All Dependencies",
+      "dependsOrder": "parallel",
+      "dependsOn": [
+        "Install Backend Dependencies",
+        "Install Frontend Dependencies"
+      ]
+    }
+  ]
+}
