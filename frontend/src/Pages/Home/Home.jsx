@@ -6,6 +6,7 @@ import {
   sortWorkspacesByDistance,
   filterWorkspacesWithinRadius,
   formatDistance,
+  calculateDistance,
 } from "../../utils/location";
 import { MapPin, Filter, SlidersHorizontal } from "lucide-react";
 
@@ -46,21 +47,45 @@ function Home() {
     let filtered = [...workspaces];
 
     if (userLocation && userLocation.latitude && userLocation.longitude) {
-      // Filter by radius if location is set
-      filtered = filterWorkspacesWithinRadius(
-        filtered,
-        userLocation.latitude,
-        userLocation.longitude,
-        radiusFilter
-      );
+      // Add distance to all workspaces
+      filtered = filtered.map((workspace) => {
+        let distance = null;
+        if (
+          workspace.coordinates?.latitude &&
+          workspace.coordinates?.longitude
+        ) {
+          distance = calculateDistance(
+            userLocation.latitude,
+            userLocation.longitude,
+            workspace.coordinates.latitude,
+            workspace.coordinates.longitude
+          );
+        }
+        return { ...workspace, distance };
+      });
+
+      // Filter by radius if location is set (only filter workspaces with coordinates)
+      filtered = filtered.filter((workspace) => {
+        if (
+          !workspace.coordinates?.latitude ||
+          !workspace.coordinates?.longitude
+        ) {
+          return true; // Include workspaces without coordinates
+        }
+        return workspace.distance <= radiusFilter;
+      });
 
       // Sort by distance if enabled
       if (sortByDistance) {
-        filtered = sortWorkspacesByDistance(
-          filtered,
-          userLocation.latitude,
-          userLocation.longitude
-        );
+        filtered = filtered.sort((a, b) => {
+          // Workspaces with distance come first, sorted by distance
+          if (a.distance !== null && b.distance !== null) {
+            return a.distance - b.distance;
+          }
+          if (a.distance !== null && b.distance === null) return -1;
+          if (a.distance === null && b.distance !== null) return 1;
+          return 0; // Both have no distance
+        });
       }
     }
 
