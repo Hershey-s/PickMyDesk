@@ -31,6 +31,36 @@ const workspaceSchema = new mongoose.Schema(
       minlength: 3, // Country name must be at least 2 characters
       maxlength: 50, // Country name can't exceed 100 characters
     },
+    // Geographic coordinates for location-based features
+    coordinates: {
+      latitude: {
+        type: Number,
+        min: -90,
+        max: 90,
+      },
+      longitude: {
+        type: Number,
+        min: -180,
+        max: 180,
+      },
+    },
+    // Full address for better location context
+    fullAddress: {
+      type: String,
+      maxlength: 200,
+    },
+    city: {
+      type: String,
+      maxlength: 50,
+    },
+    state: {
+      type: String,
+      maxlength: 50,
+    },
+    zipCode: {
+      type: String,
+      maxlength: 20,
+    },
     description: {
       type: String,
       required: true,
@@ -119,7 +149,7 @@ const workspaceSchema = new mongoose.Schema(
         friday: { start: "09:00", end: "18:00", available: true },
         saturday: { start: "10:00", end: "16:00", available: true },
         sunday: { start: "10:00", end: "16:00", available: false },
-      }
+      },
     },
     instantBooking: {
       type: Boolean,
