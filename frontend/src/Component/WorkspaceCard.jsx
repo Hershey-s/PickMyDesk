@@ -21,27 +21,36 @@ function WorkspaceCard({
     <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-2 hover:scale-105 transition-transform duration-300">
       <div className="h-full rounded-lg overflow-hidden shadow-md bg-white transition-shadow duration-300 hover:shadow-lg">
         {/* Image section */}
-        <div
-          className="relative h-48 bg-gray-200"
-          style={{
-            backgroundImage: `url(${listingImage})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          {isPopular && (
-            <div className="absolute top-2 right-2">
-              <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded">
-                Popular
-              </span>
-            </div>
-          )}
-        </div>
+        <Link to={`/workspace/${id}`} className="block">
+          <div
+            className="relative h-48 bg-gray-200 cursor-pointer hover:opacity-95 transition-opacity"
+            style={{
+              backgroundImage: `url(${listingImage})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+            title="Click to view workspace details"
+          >
+            {isPopular && (
+              <div className="absolute top-2 right-2">
+                <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded">
+                  Popular
+                </span>
+              </div>
+            )}
+          </div>
+        </Link>
 
         {/* Content section */}
         <div className="p-4">
           <div className="flex justify-between items-center mb-2">
-            <h3 className="text-lg font-medium truncate pr-2">{title}</h3>
+            <Link
+              to={`/workspace/${id}`}
+              className="text-lg font-medium truncate pr-2 hover:text-purple-700 hover:underline cursor-pointer transition-colors"
+              title="Click to view workspace details"
+            >
+              {title}
+            </Link>
             <div className="flex items-center flex-shrink-0">
               <Star size={16} fill="gold" color="gold" className="mr-1" />
               <span className="text-amber-500 font-medium">{avgRating}</span>

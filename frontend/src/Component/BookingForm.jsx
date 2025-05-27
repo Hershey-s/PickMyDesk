@@ -64,6 +64,22 @@ export default function BookingForm({ workspace }) {
     },
   });
 
+  // Check for URL parameters to pre-fill date and time
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const preSelectedDate = urlParams.get("date");
+    const preSelectedTime = urlParams.get("time");
+
+    if (preSelectedDate || preSelectedTime) {
+      setFormData((prev) => ({
+        ...prev,
+        startDate: preSelectedDate || prev.startDate,
+        endDate: preSelectedDate || prev.endDate,
+        startTime: preSelectedTime || prev.startTime,
+      }));
+    }
+  }, []);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");

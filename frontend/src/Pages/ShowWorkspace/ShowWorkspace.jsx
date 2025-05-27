@@ -4,26 +4,20 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { formatPrice } from "../../utils/currency";
+import LocationMap from "../../Component/LocationMap";
+import AvailabilityCalendar from "../../Component/AvailabilityCalendar";
 
 export default function ShowWorkspace() {
-  const [selectedDate, setSelectedDate] = useState(11);
-  const [selectedTime, setSelectedTime] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { id } = useParams();
   const [workspace, setWorkspace] = useState(null);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
 
-  const dates = Array.from({ length: 31 }, (_, i) => i + 1);
-  const times = [
-    "9:00 AM",
-    "10:00 AM",
-    "11:00 AM",
-    "12:00 PM",
-    "1:00 PM",
-    "2:00 PM",
-    "3:00 PM",
-    "4:00 PM",
-  ];
+  // Handle time slot selection from calendar
+  const handleTimeSlotSelect = (timeSlot) => {
+    setSelectedTimeSlot(timeSlot);
+  };
 
   useEffect(() => {
     const fetchWorkspaceDetails = async () => {
@@ -164,101 +158,76 @@ export default function ShowWorkspace() {
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="text-xl font-semibold">{workspace.title}</h3>
-                <p className="text-gray-600">{workspace.location}, {workspace.country}</p>
+                <p className="text-gray-600">
+                  {workspace.location}, {workspace.country}
+                </p>
               </div>
               <div className="text-right">
                 <span className="text-2xl font-bold text-purple-700">
-                  {formatPrice(workspace.price, workspace.currency || 'INR')}
+                  {formatPrice(workspace.price, workspace.currency || "INR")}
                 </span>
-                <span className="text-gray-500 ml-1">/{workspace.priceUnit}</span>
+                <span className="text-gray-500 ml-1">
+                  /{workspace.priceUnit}
+                </span>
               </div>
             </div>
-            <p className="text-gray-600 mb-4">
-              {workspace.description}
-            </p>
+            <p className="text-gray-600 mb-4">{workspace.description}</p>
             <Link
               to={`/book/${workspace._id}`}
               className="w-full bg-purple-700 hover:bg-purple-800 text-white py-3 rounded-lg font-medium text-center block"
             >
-              Book Now - {formatPrice(workspace.price, workspace.currency || 'INR')} per {workspace.priceUnit}
+              Book Now -{" "}
+              {formatPrice(workspace.price, workspace.currency || "INR")} per{" "}
+              {workspace.priceUnit}
             </Link>
           </div>
         </div>
 
         {/* Availability Calendar */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">Availability</h2>
-            <div className="flex items-center">
-              <button className="p-1 rounded-full hover:bg-gray-100">
-                &lt;
-              </button>
-              <span className="mx-4 font-medium">May 2023</span>
-              <button className="p-1 rounded-full hover:bg-gray-100">
-                &gt;
-              </button>
-            </div>
-          </div>
+        <AvailabilityCalendar
+          workspace={workspace}
+          onTimeSelect={handleTimeSlotSelect}
+        />
 
-          {/* Calendar */}
-          <div className="mb-4">
-            <div className="grid grid-cols-7 gap-1 mb-2">
-              <div className="text-center text-sm text-gray-500">Su</div>
-              <div className="text-center text-sm text-gray-500">Mo</div>
-              <div className="text-center text-sm text-gray-500">Tu</div>
-              <div className="text-center text-sm text-gray-500">We</div>
-              <div className="text-center text-sm text-gray-500">Th</div>
-              <div className="text-center text-sm text-gray-500">Fr</div>
-              <div className="text-center text-sm text-gray-500">Sa</div>
-            </div>
-
-            <div className="grid grid-cols-7 gap-1">
-              {dates.map((date) => (
-                <button
-                  key={date}
-                  className={`py-2 rounded-md text-sm ${
-                    selectedDate === date
-                      ? "bg-purple-100 text-purple-700"
-                      : "hover:bg-gray-100"
-                  }`}
-                  onClick={() => setSelectedDate(date)}
-                >
-                  {date}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <h3 className="text-sm font-medium mb-2">
-            Available time slots on May {selectedDate}
-          </h3>
-          <div className="grid grid-cols-4 gap-3 mb-4">
-            {times.map((time, index) => (
-              <button
-                key={index}
-                className={`py-2 border border-gray-200 rounded-md text-sm ${
-                  selectedTime === index
-                    ? "bg-purple-100 border-purple-300 text-purple-700"
-                    : "hover:bg-gray-50"
-                }`}
-                onClick={() => setSelectedTime(index)}
+        {/* Quick Book Button */}
+        {selectedTimeSlot && (
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold">Selected Time Slot</h3>
+                <p className="text-gray-600">
+                  {selectedTimeSlot.date.toLocaleDateString()} at{" "}
+                  {selectedTimeSlot.displayTime}
+                </p>
+              </div>
+              <Link
+                to={`/book/${workspace._id}?date=${
+                  selectedTimeSlot.date.toISOString().split("T")[0]
+                }&time=${selectedTimeSlot.time}`}
+                className="bg-purple-700 hover:bg-purple-800 text-white px-6 py-3 rounded-lg font-medium transition-colors"
               >
-                {time}
-              </button>
-            ))}
+                Book This Time
+              </Link>
+            </div>
           </div>
-
-          <button className="w-full bg-purple-700 hover:bg-purple-800 text-white py-3 rounded-lg font-medium">
-            Book Selected Time
-          </button>
-        </div>
+        )}
 
         {/* Location */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h2 className="text-xl font-bold mb-4">Location</h2>
-          <div className="bg-gray-200 h-64 rounded-lg flex items-center justify-center text-2xl text-gray-400">
-            Location Map
+          <div className="mb-4">
+            <p className="text-gray-600 mb-2">
+              📍 {workspace.location}, {workspace.country}
+            </p>
           </div>
+          <LocationMap
+            latitude={workspace.coordinates?.latitude}
+            longitude={workspace.coordinates?.longitude}
+            address={`${workspace.location}, ${workspace.country}`}
+            title={workspace.title}
+            height="300px"
+            zoom={15}
+          />
         </div>
       </div>
     </div>
