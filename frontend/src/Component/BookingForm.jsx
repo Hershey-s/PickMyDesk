@@ -14,6 +14,25 @@ const formatTimeToAMPM = (time24) => {
   const ampm = hour24 >= 12 ? "PM" : "AM";
   return `${hour12}:${minutes} ${ampm}`;
 };
+
+// Generate time options for dropdown
+const generateTimeOptions = (isEndTime = false) => {
+  const options = [];
+  const startHour = isEndTime ? 12 : 6; // End time starts from 12 PM, Start time from 6 AM
+  const endHour = isEndTime ? 23 : 11; // End time goes to 11 PM, Start time to 11 AM
+
+  for (let hour = startHour; hour <= endHour; hour++) {
+    for (let minute = 0; minute < 60; minute += 30) {
+      // 30-minute intervals
+      const time24 = `${hour.toString().padStart(2, "0")}:${minute
+        .toString()
+        .padStart(2, "0")}`;
+      const time12 = formatTimeToAMPM(time24);
+      options.push({ value: time24, label: time12 });
+    }
+  }
+  return options;
+};
 import {
   Card,
   CardContent,
@@ -24,6 +43,10 @@ import {
   Alert,
   CircularProgress,
   Divider,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 
 export default function BookingForm({ workspace }) {
@@ -31,7 +54,7 @@ export default function BookingForm({ workspace }) {
     startDate: "",
     endDate: "",
     startTime: "09:00", // Default to 9:00 AM
-    endTime: "17:00", // Default to 5:00 PM
+    endTime: "14:00", // Default to 2:00 PM (to ensure it's actually PM)
     guestCount: 1,
     specialRequests: "",
     contactInfo: {
@@ -266,40 +289,38 @@ export default function BookingForm({ workspace }) {
             {workspace.priceUnit === "hour" && (
               <Box sx={{ display: "flex", gap: 2 }}>
                 <Box sx={{ flex: 1 }}>
-                  <TextField
-                    label="Start Time (AM)"
-                    type="time"
-                    name="startTime"
-                    value={formData.startTime}
-                    onChange={handleInputChange}
-                    InputLabelProps={{ shrink: true }}
-                    inputProps={{ step: 300 }} // 5 min intervals
-                    helperText={
-                      formData.startTime
-                        ? formatTimeToAMPM(formData.startTime)
-                        : "Default: 9:00 AM"
-                    }
-                    required
-                    fullWidth
-                  />
+                  <FormControl fullWidth required>
+                    <InputLabel>Start Time (AM)</InputLabel>
+                    <Select
+                      name="startTime"
+                      value={formData.startTime}
+                      onChange={handleInputChange}
+                      label="Start Time (AM)"
+                    >
+                      {generateTimeOptions(false).map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 </Box>
                 <Box sx={{ flex: 1 }}>
-                  <TextField
-                    label="End Time (PM)"
-                    type="time"
-                    name="endTime"
-                    value={formData.endTime}
-                    onChange={handleInputChange}
-                    InputLabelProps={{ shrink: true }}
-                    inputProps={{ step: 300 }} // 5 min intervals
-                    helperText={
-                      formData.endTime
-                        ? formatTimeToAMPM(formData.endTime)
-                        : "Default: 5:00 PM"
-                    }
-                    required
-                    fullWidth
-                  />
+                  <FormControl fullWidth required>
+                    <InputLabel>End Time (PM)</InputLabel>
+                    <Select
+                      name="endTime"
+                      value={formData.endTime}
+                      onChange={handleInputChange}
+                      label="End Time (PM)"
+                    >
+                      {generateTimeOptions(true).map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 </Box>
               </Box>
             )}
