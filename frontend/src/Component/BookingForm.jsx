@@ -59,7 +59,7 @@ export default function BookingForm({ workspace }) {
   const [availability, setAvailability] = useState(null);
 
   const navigate = useNavigate();
-  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5004";
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5007";
 
   // Calculate total price when dates/times change
   useEffect(() => {

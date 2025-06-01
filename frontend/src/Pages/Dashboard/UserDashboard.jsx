@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import WorkspaceCard from "../../Component/WorkspaceCard";
 import LocationSearch from "../../Component/LocationSearch";
+import SmartRecommendations from "../../Component/SmartRecommendations";
+import AIChatbot from "../../Component/AIChatbot";
 import axios from "axios";
 import {
   sortWorkspacesByDistance,
@@ -26,7 +28,7 @@ const UserDashboard = () => {
     const fetchWorkspaces = async () => {
       try {
         setLoading(true);
-        const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5006";
+        const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5007";
         console.log("🔍 Fetching public workspaces from:", baseUrl);
 
         // Use regular endpoint and filter on frontend
@@ -156,6 +158,11 @@ const UserDashboard = () => {
         <p className="text-gray-600">
           Discover workspaces near you or search by location
         </p>
+      </div>
+
+      {/* Smart Recommendations Section */}
+      <div className="mb-8">
+        <SmartRecommendations />
       </div>
 
       {/* Location Search */}
@@ -297,6 +304,9 @@ const UserDashboard = () => {
           ))}
         </div>
       )}
+
+      {/* AI Chatbot */}
+      <AIChatbot />
     </div>
   );
 };

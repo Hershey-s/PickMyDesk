@@ -12,6 +12,7 @@ import cors from "cors";
 import userRouter from "./router/userReg.router.js";
 import WorksSpaceRouter from "./router/workspace.router.js";
 import bookingRouter from "./router/booking.router.js";
+import analyticsRouter from "./routes/analytics.js";
 import verifyToken from "./middlewares/authMiddleware.js";
 
 const port = process.env.PORT || 5006;
@@ -45,6 +46,7 @@ app.options("*", cors(corsOptions));
 app.use("/", userRouter);
 app.use("/", WorksSpaceRouter);
 app.use("/", bookingRouter);
+app.use("/analytics", analyticsRouter);
 
 app.get("/", (req, res) => {
   res.send("Hello from the backend!");

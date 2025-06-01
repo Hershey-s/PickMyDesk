@@ -50,9 +50,10 @@ const AuthenticatedRoute = () => {
     window.location.href = "/admin/dashboard";
     return null;
   } else {
-    console.log("👤 Regular user detected, showing workspace discovery");
-    // Show user dashboard (workspace discovery)
-    return <UserDashboard />;
+    console.log("👤 Regular user detected, redirecting to workspaces");
+    // Redirect user to workspaces page (which has navbar)
+    window.location.href = "/workspaces";
+    return null;
   }
 };
 

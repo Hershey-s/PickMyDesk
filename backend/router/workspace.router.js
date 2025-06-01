@@ -8,6 +8,7 @@ import {
   updateWorkspace,
   deleteWorkspace,
   updateAllWorkspaceCapacities,
+  getSmartRecommendations,
 } from "../controllers/workspace.controllers.js";
 import verifyToken from "../middlewares/authMiddleware.js"; // Import the JWT verification middleware
 import {
@@ -69,7 +70,20 @@ WorkSpaceRouter.route("/workspaces/owner/:ownerId").get(
   WrapAsync(getWorkspacesByOwner)
 );
 
-// Route for individual workspace
+// AI/ML Smart Recommendations route (User only) - MUST come before /workspaces/:id
+WorkSpaceRouter.route("/workspaces/recommendations").get(
+  authenticateToken,
+  WrapAsync(getSmartRecommendations)
+);
+
+// Utility route to update all workspace capacities (Admin only)
+WorkSpaceRouter.route("/workspaces/admin/update-capacities").post(
+  authenticateToken,
+  requireAdmin,
+  WrapAsync(updateAllWorkspaceCapacities)
+);
+
+// Route for individual workspace - MUST come after specific routes
 WorkSpaceRouter.route("/workspaces/:id")
   .get(WrapAsync(getWorkspaceById)) // Public access for viewing
   .put(
@@ -79,12 +93,5 @@ WorkSpaceRouter.route("/workspaces/:id")
     WrapAsync(updateWorkspace)
   ) // Admin only
   .delete(authenticateToken, requireAdmin, WrapAsync(deleteWorkspace)); // Admin only
-
-// Utility route to update all workspace capacities (Admin only)
-WorkSpaceRouter.route("/workspaces/admin/update-capacities").post(
-  authenticateToken,
-  requireAdmin,
-  WrapAsync(updateAllWorkspaceCapacities)
-);
 
 export default WorkSpaceRouter;

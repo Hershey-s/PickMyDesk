@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Debug - PickMyDesk</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-link {
+            display: block;
+            padding: 10px 15px;
+            margin: 10px 0;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .test-link:hover {
+            background: #2563eb;
+        }
+        .info {
+            background: #dbeafe;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧭 Navigation Debug Tool</h1>
+        
+        <div class="info">
+            <h3>Test Navigation Bar Visibility</h3>
+            <p>Click the links below to test if the navigation bar appears correctly on different pages:</p>
+        </div>
+
+        <h3>🔗 Test Links</h3>
+        
+        <a href="http://localhost:5173/" class="test-link">
+            🏠 Home Page (/) - Should show Welcome page without navbar
+        </a>
+        
+        <a href="http://localhost:5173/workspaces" class="test-link">
+            🏢 Workspaces Page (/workspaces) - Should show navbar with user info
+        </a>
+        
+        <a href="http://localhost:5173/bookings" class="test-link">
+            📅 My Bookings (/bookings) - Should show navbar
+        </a>
+        
+        <a href="http://localhost:5173/user/login" class="test-link">
+            🔐 User Login (/user/login) - Should NOT show navbar
+        </a>
+        
+        <a href="http://localhost:5173/admin/dashboard" class="test-link">
+            👑 Admin Dashboard (/admin/dashboard) - Should show navbar
+        </a>
+
+        <div class="info">
+            <h3>✅ Expected Behavior:</h3>
+            <ul>
+                <li><strong>Home (/):</strong> Welcome page without navbar (for unauthenticated users)</li>
+                <li><strong>Workspaces:</strong> User dashboard WITH navbar showing "Home", "My Bookings", user info, "LogOut"</li>
+                <li><strong>Login pages:</strong> No navbar (clean auth experience)</li>
+                <li><strong>All other pages:</strong> Should have navbar when user is logged in</li>
+            </ul>
+        </div>
+
+        <div class="info">
+            <h3>🔧 If navbar is missing:</h3>
+            <ol>
+                <li>Check if user is logged in (localStorage should have 'user' and 'token')</li>
+                <li>Verify the route is not in the authPath array</li>
+                <li>Make sure PageWrapper is being used for the route</li>
+                <li>Check browser console for any JavaScript errors</li>
+            </ol>
+        </div>
+
+        <h3>🛠️ Debug Info</h3>
+        <div id="debug-info" style="background: #f3f4f6; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px;">
+            Loading debug info...
+        </div>
+    </div>
+
+    <script>
+        // Display debug information
+        const debugInfo = document.getElementById('debug-info');
+        const user = localStorage.getItem('user');
+        const token = localStorage.getItem('token');
+        
+        debugInfo.innerHTML = `
+            <strong>Current URL:</strong> ${window.location.href}<br>
+            <strong>User in localStorage:</strong> ${user ? 'Yes' : 'No'}<br>
+            <strong>Token in localStorage:</strong> ${token ? 'Yes' : 'No'}<br>
+            <strong>User Agent:</strong> ${navigator.userAgent}<br>
+            <strong>Timestamp:</strong> ${new Date().toLocaleString()}
+            ${user ? `<br><strong>User Data:</strong> ${user}` : ''}
+        `;
+    </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        .status {
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+        .success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .button {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 PickMyDesk Test</h1>
+        <div class="status success">✅ Frontend Server is Working!</div>
+        <p>If you can see this page, the Vite development server is running correctly.</p>
+        
+        <div style="margin: 30px 0;">
+            <h3>🔧 Server Status:</h3>
+            <p>Frontend: <span class="success">Running on localhost:5173</span></p>
+            <p>Backend: <span id="backend-status">Checking...</span></p>
+        </div>
+        
+        <a href="/index.html" class="button">Go to Main App</a>
+        <a href="http://localhost:5007" class="button" target="_blank">Test Backend</a>
+    </div>
+
+    <script>
+        // Test backend connection
+        fetch('http://localhost:5007')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('backend-status').innerHTML = '<span class="success">✅ Connected</span>';
+                console.log('Backend response:', data);
+            })
+            .catch(error => {
+                document.getElementById('backend-status').innerHTML = '<span style="color: #f44336;">❌ Not Connected</span>';
+                console.error('Backend error:', error);
+            });
+    </script>
+</body>
+</html>

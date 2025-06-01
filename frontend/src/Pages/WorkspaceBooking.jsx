@@ -24,7 +24,7 @@ export default function WorkspaceBooking() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5004";
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5007";
 
   useEffect(() => {
     fetchWorkspaceDetails();

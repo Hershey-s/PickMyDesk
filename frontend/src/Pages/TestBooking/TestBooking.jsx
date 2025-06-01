@@ -5,7 +5,7 @@ const TestBooking = () => {
   const [testResults, setTestResults] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5004";
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5007";
 
   const runTests = async () => {
     setLoading(true);

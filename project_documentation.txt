@@ -1,0 +1,134 @@
+WORKSPACE BOOKING SYSTEM DOCUMENTATION
+=====================================
+
+Table of Contents
+----------------
+1. Project Overview
+2. System Architecture
+3. Features
+4. Technical Stack
+5. Authentication System
+6. Directory Structure
+7. Setup Instructions
+8. API Endpoints
+9. Environment Variables
+
+1. Project Overview
+------------------
+The Workspace Booking System is a web application that allows users to book workspaces while providing administrators (workspace owners) with management capabilities. The system features a dual-login system separating regular users from administrators.
+
+2. System Architecture
+---------------------
+The application follows a client-server architecture:
+- Frontend: React-based single-page application
+- Backend: RESTful API server
+- Authentication: JWT-based authentication with Google OAuth integration
+
+3. Features
+-----------
+User Features:
+- User registration and login
+- Google OAuth integration
+- Workspace browsing and booking
+- User profile management
+
+Admin Features:
+- Separate admin login portal
+- Workspace management
+- Booking oversight
+- User management
+
+4. Technical Stack
+-----------------
+Frontend:
+- React.js
+- Material-UI (MUI) for UI components
+- React Router for navigation
+- Axios for API requests
+- @react-oauth/google for Google authentication
+
+Backend:
+- RESTful API
+- JWT authentication
+- Google OAuth2 integration
+
+5. Authentication System
+-----------------------
+The system implements a dual-authentication system:
+a) Traditional Email/Password:
+   - JWT-based authentication
+   - Role-based access control (user/admin)
+
+b) Google OAuth:
+   - Integrated Google Sign-In
+   - Automatic account creation/linking
+   - Role verification
+
+6. Directory Structure
+---------------------
+frontend/
+├── src/
+│   ├── Pages/
+│   │   ├── Auth/
+│   │   │   ├── UserLogin.jsx
+│   │   │   └── AdminLogin.jsx
+│   │   │
+│   │   ├── components/
+│   │   └── assets/
+│   └── App.jsx
+
+7. Setup Instructions
+--------------------
+1. Clone the repository
+2. Install dependencies:
+   ```
+   cd frontend
+   npm install
+   ```
+3. Set up environment variables:
+   Create a .env file with:
+   - VITE_API_URL=<backend_url>
+   - Other necessary environment variables
+
+4. Start the development server:
+   ```
+   npm run dev
+   ```
+
+8. API Endpoints
+---------------
+Authentication:
+- POST /login - User login
+- POST /auth/google - Google OAuth login
+- POST /admin/login - Admin login
+
+9. Environment Variables
+-----------------------
+Frontend (.env):
+- VITE_API_URL: Backend API URL (default: http://localhost:5006)
+
+Security Notes:
+--------------
+1. JWT tokens are stored in localStorage
+2. Role-based access control is implemented
+3. Google OAuth integration requires proper API keys
+4. Password security measures should be implemented
+
+Best Practices:
+--------------
+1. Always validate user roles on both client and server
+2. Implement proper error handling
+3. Use secure communication (HTTPS)
+4. Regular security audits
+5. Keep dependencies updated
+
+Support and Maintenance:
+-----------------------
+For support or maintenance:
+1. Check console logs for errors
+2. Verify environment variables
+3. Ensure all dependencies are correctly installed
+4. Validate API endpoints are accessible
+
+Version: 1.0.0
+Last Updated: [Current Date] 

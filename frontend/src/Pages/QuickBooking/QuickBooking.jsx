@@ -6,7 +6,7 @@ const QuickBooking = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5004";
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5007";
 
   useEffect(() => {
     fetchWorkspaces();

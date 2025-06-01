@@ -16,7 +16,7 @@ const AvailabilityCalendar = ({ workspace, onTimeSelect }) => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5004";
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5007";
 
   // Get calendar data for current month
   const calendarData = getCalendarData(

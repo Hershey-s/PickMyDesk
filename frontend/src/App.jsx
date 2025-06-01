@@ -12,6 +12,8 @@ import UserSignup from "./Pages/Auth/UserSignup";
 import AdminSignup from "./Pages/Auth/AdminSignup";
 import AdminDashboard from "./Pages/Admin/AdminDashboard";
 import AdminWorkspaces from "./Pages/Admin/AdminWorkspaces";
+import AdminAnalytics from "./Pages/Admin/AdminAnalytics";
+import EditWorkspace from "./Pages/Admin/EditWorkspace";
 import Footer from "./Component/Footer";
 import NotFound from "./Component/NotFound";
 import CreateWorkspace from "./Component/ListingForm";
@@ -26,6 +28,7 @@ import Terms from "./Pages/Terms/Terms";
 import TestFeatures from "./Pages/TestFeatures/TestFeatures";
 import Support from "./Pages/Support/Support";
 import ReportIssue from "./Pages/ReportIssue/ReportIssue";
+import GoogleOAuthDebug from "./Pages/Debug/GoogleOAuthDebug";
 import Blog from "./Pages/Blog/Blog";
 import WorkspaceGuide from "./Pages/WorkspaceGuide/WorkspaceGuide";
 import CityGuides from "./Pages/CityGuides/CityGuides";
@@ -111,6 +114,14 @@ const routes = [
     element: <AdminWorkspaces />,
   },
   {
+    path: "/admin/analytics",
+    element: <AdminAnalytics />,
+  },
+  {
+    path: "/admin/workspace/edit/:id",
+    element: <EditWorkspace />,
+  },
+  {
     path: "/about",
     element: <About />,
   },
@@ -133,6 +144,10 @@ const routes = [
   {
     path: "/test-features",
     element: <TestFeatures />,
+  },
+  {
+    path: "/debug/oauth",
+    element: <GoogleOAuthDebug />,
   },
   {
     path: "/support",

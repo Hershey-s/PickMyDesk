@@ -25,7 +25,7 @@ const AdminWorkspaces = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5006";
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5007";
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -67,6 +67,36 @@ const AdminWorkspaces = () => {
       setError("Failed to load workspaces");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteWorkspace = async (workspaceId) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/admin/login");
+        return;
+      }
+
+      console.log("🗑️ Deleting workspace:", workspaceId);
+
+      const response = await axios.delete(
+        `${baseURL}/workspaces/${workspaceId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      console.log("✅ Workspace deleted successfully:", response.data);
+
+      // Remove the deleted workspace from the state
+      setWorkspaces(workspaces.filter((ws) => ws._id !== workspaceId));
+
+      // Show success message
+      setError(""); // Clear any previous errors
+    } catch (error) {
+      console.error("❌ Error deleting workspace:", error);
+      setError(error.response?.data?.message || "Failed to delete workspace");
     }
   };
 
@@ -181,8 +211,10 @@ const AdminWorkspaces = () => {
                   <Box sx={{ display: "flex", gap: 1 }}>
                     <IconButton
                       color="primary"
-                      onClick={() => navigate(`/workspace/${workspace._id}`)}
-                      title="View Workspace"
+                      onClick={() =>
+                        navigate(`/admin/workspace/edit/${workspace._id}`)
+                      }
+                      title="Edit Workspace"
                     >
                       <EditIcon />
                     </IconButton>
@@ -191,11 +223,10 @@ const AdminWorkspaces = () => {
                       onClick={() => {
                         if (
                           window.confirm(
-                            "Are you sure you want to delete this workspace?"
+                            `Are you sure you want to delete "${workspace.title}"? This action cannot be undone.`
                           )
                         ) {
-                          // TODO: Implement delete functionality
-                          console.log("Delete workspace:", workspace._id);
+                          handleDeleteWorkspace(workspace._id);
                         }
                       }}
                       title="Delete Workspace"

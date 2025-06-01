@@ -26,7 +26,7 @@ function Home() {
     const fetchWorkspaces = async () => {
       try {
         setLoading(true);
-        const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5004";
+        const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5007";
         console.log("🔍 Fetching public workspaces from:", baseUrl);
 
         // Use regular endpoint and filter on frontend
