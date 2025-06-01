@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const QuickBooking = () => {
   const [workspaces, setWorkspaces] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
-  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5004";
 
   useEffect(() => {
     fetchWorkspaces();
@@ -23,12 +23,12 @@ const QuickBooking = () => {
 
   const createQuickBooking = async (workspace) => {
     setLoading(true);
-    setMessage('');
+    setMessage("");
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        setMessage('Please log in first');
+        setMessage("Please log in first");
         setLoading(false);
         return;
       }
@@ -36,34 +36,35 @@ const QuickBooking = () => {
       // Create booking for tomorrow
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
-      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+      const tomorrowStr = tomorrow.toISOString().split("T")[0];
 
       const bookingData = {
         workspaceId: workspace._id,
         startDate: tomorrowStr,
         endDate: tomorrowStr,
-        startTime: workspace.priceUnit === 'hour' ? "09:00" : undefined,
-        endTime: workspace.priceUnit === 'hour' ? "17:00" : undefined,
+        startTime: workspace.priceUnit === "hour" ? "09:00" : undefined,
+        endTime: workspace.priceUnit === "hour" ? "17:00" : undefined,
         guestCount: 1,
         contactInfo: {
           phone: "+919876543210",
-          email: "test@example.com"
+          email: "test@example.com",
         },
-        specialRequests: "Test booking for cancel/reschedule testing"
+        specialRequests: "Test booking for cancel/reschedule testing",
       };
 
       console.log("Creating booking with data:", bookingData);
 
       const response = await axios.post(`${baseURL}/bookings`, bookingData, {
-        headers: { 
+        headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          "Content-Type": "application/json",
+        },
       });
 
       console.log("Booking created:", response.data);
-      setMessage(`✅ Booking created successfully! Booking ID: ${response.data.booking._id}`);
-      
+      setMessage(
+        `✅ Booking created successfully! Booking ID: ${response.data.booking._id}`
+      );
     } catch (error) {
       console.error("Error creating booking:", error);
       const errorMessage = error.response?.data?.message || error.message;
@@ -76,43 +77,55 @@ const QuickBooking = () => {
   return (
     <div className="min-h-screen py-12">
       <div className="max-w-4xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">🚀 Quick Booking Creator</h1>
-        
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">
+          🚀 Quick Booking Creator
+        </h1>
+
         <div className="mb-6 p-4 bg-blue-50 rounded-lg">
           <p className="text-blue-800">
-            Create a test booking to test the cancel and reschedule functionality.
+            Create a test booking to test the cancel and reschedule
+            functionality.
           </p>
         </div>
 
         {message && (
-          <div className={`mb-6 p-4 rounded-lg ${
-            message.includes('✅') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
-          }`}>
+          <div
+            className={`mb-6 p-4 rounded-lg ${
+              message.includes("✅")
+                ? "bg-green-50 text-green-800"
+                : "bg-red-50 text-red-800"
+            }`}
+          >
             {message}
           </div>
         )}
 
         <div className="grid md:grid-cols-3 gap-6">
           {workspaces.map((workspace) => (
-            <div key={workspace._id} className="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div
+              key={workspace._id}
+              className="bg-white rounded-lg shadow-lg overflow-hidden"
+            >
               <img
                 src={workspace.listingImage}
                 alt={workspace.title}
                 className="w-full h-48 object-cover"
               />
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">{workspace.title}</h3>
+                <h3 className="text-xl font-semibold mb-2">
+                  {workspace.title}
+                </h3>
                 <p className="text-gray-600 mb-2">📍 {workspace.location}</p>
                 <p className="text-purple-600 font-semibold mb-4">
                   ₹{workspace.price}/{workspace.priceUnit}
                 </p>
-                
+
                 <button
                   onClick={() => createQuickBooking(workspace)}
                   disabled={loading}
                   className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 disabled:opacity-50"
                 >
-                  {loading ? 'Creating...' : 'Create Test Booking'}
+                  {loading ? "Creating..." : "Create Test Booking"}
                 </button>
               </div>
             </div>
@@ -124,7 +137,13 @@ const QuickBooking = () => {
           <ol className="list-decimal list-inside space-y-2 text-gray-700">
             <li>Make sure you're logged in</li>
             <li>Click "Create Test Booking" on any workspace above</li>
-            <li>Go to <a href="/bookings" className="text-purple-600 underline">My Bookings</a> page</li>
+            <li>
+              Go to{" "}
+              <a href="/bookings" className="text-purple-600 underline">
+                My Bookings
+              </a>{" "}
+              page
+            </li>
             <li>Test the Cancel and Reschedule buttons</li>
             <li>Check browser console for detailed logs</li>
           </ol>

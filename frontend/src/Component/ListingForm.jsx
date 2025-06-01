@@ -75,49 +75,127 @@ const CreateWorkspace = () => {
     try {
       setIsLoading(true);
 
+      console.log("🔍 Form data received:", data);
+      console.log("🔍 Tags:", tags);
+      console.log("🔍 Selected file:", selectedFile);
+      console.log("🔍 Token:", token ? "Token exists" : "No token");
+
+      // Check if user is logged in
+      if (!token) {
+        setSnackbarMessage("Please login as admin to create workspace");
+        setSnackbarType("error");
+        setOpenSnackbar(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // Validate required fields - provide default title if missing
+      if (!data.title || data.title.trim() === "") {
+        console.log("⚠️ Title missing, using location as title");
+        data.title = data.location || "Workspace";
+      }
+
+      console.log("✅ Title after validation:", data.title);
+
       // Create FormData for file upload
       const formData = new FormData();
 
       // Add all form fields
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         if (data[key] !== undefined && data[key] !== null) {
           formData.append(key, data[key]);
+          console.log(`📝 Adding field: ${key} = ${data[key]}`);
         }
       });
 
       // Add tags
-      formData.append('tags', JSON.stringify(tags));
+      formData.append("tags", JSON.stringify(tags));
+      console.log("📝 Adding tags:", JSON.stringify(tags));
 
       // Add image file if selected
       if (selectedFile) {
-        formData.append('listingImage', selectedFile);
+        formData.append("listingImage", selectedFile);
+        console.log("📝 Adding image file:", selectedFile.name);
       } else {
         // Use a default image URL if no file selected
-        formData.append('listingImage', 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=500');
+        formData.append(
+          "listingImage",
+          "https://images.unsplash.com/photo-1497366216548-37526070297c?w=500"
+        );
+        console.log("📝 Using default image");
       }
 
       // Add currency field
-      formData.append('currency', 'INR');
+      formData.append("currency", "INR");
 
-      console.log("Submitting form data:", formData);
+      console.log("🚀 Submitting form data...");
+      console.log("🌐 API URL:", import.meta.env.VITE_API_URL);
 
-      const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5006";
+      console.log("📡 Making request to:", `${baseURL}/workspaces`);
+
+      // Log FormData contents
+      console.log("📦 FormData contents:");
+      for (let [key, value] of formData.entries()) {
+        console.log(`  ${key}:`, value);
+      }
+
       const response = await axios.post(`${baseURL}/workspaces`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
 
-      console.log("success===>", response);
-      setSnackbarMessage(response.data.message || "Workspace created successfully!");
+      console.log("✅ SUCCESS Response:", response);
+
+      // Check user role for appropriate message
+      const userData = localStorage.getItem("user");
+      const user = userData ? JSON.parse(userData) : null;
+      const successMessage =
+        user?.role === "admin"
+          ? "Workspace created successfully! Redirecting to manage workspaces..."
+          : "Workspace created successfully!";
+
+      setSnackbarMessage(response.data.message || successMessage);
       setSnackbarType("success");
       setOpenSnackbar(true);
       setIsLoading(false);
-      navigate("/");
+
+      // Redirect based on user role after a short delay
+      setTimeout(() => {
+        if (userData) {
+          const userForRedirect = JSON.parse(userData);
+          if (userForRedirect.role === "admin") {
+            // Redirect to workspace management page for admins
+            console.log("🔄 Redirecting admin to workspace management...");
+            navigate("/admin/workspaces");
+          } else {
+            navigate("/");
+          }
+        } else {
+          navigate("/");
+        }
+      }, 1500); // 1.5 second delay to show success message
     } catch (error) {
-      console.log("error===>", error);
-      setSnackbarMessage(error.response?.data?.message || "An error occurred");
+      console.error("❌ ERROR Details:");
+      console.error("Status:", error.response?.status);
+      console.error("Status Text:", error.response?.statusText);
+      console.error("Response Data:", error.response?.data);
+      console.error("Request Config:", error.config);
+      console.error("Full Error:", error);
+
+      let errorMessage = "An error occurred while creating workspace";
+
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.details) {
+        errorMessage = error.response.data.details.join(", ");
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setSnackbarMessage(errorMessage);
       setSnackbarType("error");
       setOpenSnackbar(true);
       setIsLoading(false);
@@ -154,10 +232,13 @@ const CreateWorkspace = () => {
         className="grid grid-cols-1 sm:grid-cols-3 gap-6 border border-gray-200 p-8 mx-2 rounded-lg"
         encType="multipart/form-data"
       >
-        {/* Workspace Title */}
+        {/* Workspace Title - REQUIRED FIELD */}
         <div className="col-span-3">
-          <label htmlFor="title" className="block font-medium text-lg">
-            Title
+          <label
+            htmlFor="title"
+            className="block font-medium text-lg text-red-600"
+          >
+            Title *
           </label>
           <input
             type="text"
@@ -173,12 +254,18 @@ const CreateWorkspace = () => {
                 message: "Title should not exceed 40 characters",
               },
             })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
-            placeholder="e.g., Heritage Haveli in Jaipur"
+            className="w-full px-4 py-2 border-2 border-red-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-purple-600"
+            placeholder="e.g., Modern Co-working Space in Bengaluru"
+            style={{ backgroundColor: "#fef2f2" }}
           />
           {errors.title && (
-            <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
+            <p className="text-red-500 text-sm mt-1 font-bold">
+              {errors.title.message}
+            </p>
           )}
+          <p className="text-sm text-gray-600 mt-1">
+            This field is required and must be filled
+          </p>
         </div>
         {/* Description */}
         <div className="col-span-3">
@@ -208,7 +295,10 @@ const CreateWorkspace = () => {
 
         {/* Upload Image */}
         <div className="col-span-3">
-          <label htmlFor="listingImage" className="block font-medium text-lg mb-2">
+          <label
+            htmlFor="listingImage"
+            className="block font-medium text-lg mb-2"
+          >
             Upload Workspace Image
           </label>
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-400 transition-colors">

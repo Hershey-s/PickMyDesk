@@ -4,35 +4,7 @@ import axios from "axios";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { formatPrice } from "../utils/currency";
-
-// Utility function to format time to AM/PM
-const formatTimeToAMPM = (time24) => {
-  if (!time24) return "";
-  const [hours, minutes] = time24.split(":");
-  const hour24 = parseInt(hours, 10);
-  const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
-  const ampm = hour24 >= 12 ? "PM" : "AM";
-  return `${hour12}:${minutes} ${ampm}`;
-};
-
-// Generate time options for dropdown
-const generateTimeOptions = (isEndTime = false) => {
-  const options = [];
-  const startHour = isEndTime ? 12 : 6; // End time starts from 12 PM, Start time from 6 AM
-  const endHour = isEndTime ? 23 : 11; // End time goes to 11 PM, Start time to 11 AM
-
-  for (let hour = startHour; hour <= endHour; hour++) {
-    for (let minute = 0; minute < 60; minute += 30) {
-      // 30-minute intervals
-      const time24 = `${hour.toString().padStart(2, "0")}:${minute
-        .toString()
-        .padStart(2, "0")}`;
-      const time12 = formatTimeToAMPM(time24);
-      options.push({ value: time24, label: time12 });
-    }
-  }
-  return options;
-};
+import { generateTimeOptionsWithAMPM } from "../utils/timeFormat";
 import {
   Card,
   CardContent,
@@ -53,8 +25,8 @@ export default function BookingForm({ workspace }) {
   const [formData, setFormData] = useState({
     startDate: "",
     endDate: "",
-    startTime: "09:00", // Default to 9:00 AM
-    endTime: "14:00", // Default to 2:00 PM (to ensure it's actually PM)
+    startTime: "09:00", // Default to 09:00 (9:00 AM)
+    endTime: "17:00", // Default to 17:00 (5:00 PM)
     guestCount: 1,
     specialRequests: "",
     contactInfo: {
@@ -87,7 +59,7 @@ export default function BookingForm({ workspace }) {
   const [availability, setAvailability] = useState(null);
 
   const navigate = useNavigate();
-  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5004";
 
   // Calculate total price when dates/times change
   useEffect(() => {
@@ -185,7 +157,18 @@ export default function BookingForm({ workspace }) {
 
     try {
       const token = localStorage.getItem("token");
+      console.log("🔑 Token check:", token ? "Token found" : "No token");
+
       if (!token) {
+        setError("Please log in to make a booking");
+        navigate("/login");
+        return;
+      }
+
+      // Validate token format
+      if (!token.includes(".")) {
+        setError("Invalid token format. Please log in again.");
+        localStorage.removeItem("token");
         navigate("/login");
         return;
       }
@@ -225,6 +208,11 @@ export default function BookingForm({ workspace }) {
       }
 
       console.log("📤 Sending booking data:", cleanedData);
+      console.log("🔗 API URL:", `${baseURL}/bookings`);
+      console.log(
+        "🔑 Authorization header:",
+        `Bearer ${token.substring(0, 20)}...`
+      );
 
       const response = await axios.post(`${baseURL}/bookings`, cleanedData, {
         headers: {
@@ -233,6 +221,7 @@ export default function BookingForm({ workspace }) {
         },
       });
 
+      console.log("✅ Booking response:", response.data);
       setSuccess("Booking created successfully!");
 
       // Redirect to bookings page after 2 seconds
@@ -240,8 +229,21 @@ export default function BookingForm({ workspace }) {
         navigate("/bookings");
       }, 2000);
     } catch (error) {
-      console.error("Booking error:", error);
-      setError(error.response?.data?.message || "Failed to create booking");
+      console.error("❌ Booking error:", error);
+      console.error("❌ Error response:", error.response?.data);
+
+      if (error.response?.status === 401) {
+        setError("Session expired. Please log in again.");
+        localStorage.removeItem("token");
+        navigate("/login");
+      } else if (error.response?.status === 403) {
+        setError("Access denied. Please check your account permissions.");
+      } else {
+        setError(
+          error.response?.data?.message ||
+            "Failed to create booking. Please try again."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -301,19 +303,19 @@ export default function BookingForm({ workspace }) {
               />
             </Box>
 
-            {/* Time Selection (for hourly bookings) */}
-            {workspace.priceUnit === "hour" && (
+            {/* Time Selection (always show for better user experience) */}
+            {true && (
               <Box sx={{ display: "flex", gap: 2 }}>
                 <Box sx={{ flex: 1 }}>
                   <FormControl fullWidth required>
-                    <InputLabel>Start Time (AM)</InputLabel>
+                    <InputLabel>Start Time (AM/PM)</InputLabel>
                     <Select
                       name="startTime"
                       value={formData.startTime}
                       onChange={handleInputChange}
-                      label="Start Time (AM)"
+                      label="Start Time (AM/PM)"
                     >
-                      {generateTimeOptions(false).map((option) => (
+                      {generateTimeOptionsWithAMPM(false).map((option) => (
                         <MenuItem key={option.value} value={option.value}>
                           {option.label}
                         </MenuItem>
@@ -323,14 +325,14 @@ export default function BookingForm({ workspace }) {
                 </Box>
                 <Box sx={{ flex: 1 }}>
                   <FormControl fullWidth required>
-                    <InputLabel>End Time (PM)</InputLabel>
+                    <InputLabel>End Time (AM/PM)</InputLabel>
                     <Select
                       name="endTime"
                       value={formData.endTime}
                       onChange={handleInputChange}
-                      label="End Time (PM)"
+                      label="End Time (AM/PM)"
                     >
-                      {generateTimeOptions(true).map((option) => (
+                      {generateTimeOptionsWithAMPM(true).map((option) => (
                         <MenuItem key={option.value} value={option.value}>
                           {option.label}
                         </MenuItem>
@@ -348,9 +350,14 @@ export default function BookingForm({ workspace }) {
               name="guestCount"
               value={formData.guestCount}
               onChange={handleInputChange}
-              inputProps={{ min: 1, max: workspace.maxCapacity || 50 }}
+              inputProps={{
+                min: 1,
+                max: 20, // Always allow up to 20 people
+                step: 1,
+              }}
               required
               fullWidth
+              helperText="Maximum 20 people allowed"
             />
 
             {/* Contact Information */}

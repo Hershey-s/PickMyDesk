@@ -124,8 +124,9 @@ const workspaceSchema = new mongoose.Schema(
     // Booking-related fields
     maxCapacity: {
       type: Number,
-      default: 1,
+      default: 20,
       min: 1,
+      max: 50,
     },
     amenities: {
       type: [String],

@@ -1,9 +1,17 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import NavBar from "./Component/NavBar";
 import BackgroundWrapper from "./Component/BackgroundWrapper";
+import Welcome from "./Pages/Welcome/Welcome";
 import Home from "./Pages/Home/Home";
+import UserDashboard from "./Pages/Dashboard/UserDashboard";
 import Signup from "./Pages/Authentication/Signup";
 import Login from "./Pages/Authentication/Login";
+import UserLogin from "./Pages/Auth/UserLogin";
+import AdminLogin from "./Pages/Auth/AdminLogin";
+import UserSignup from "./Pages/Auth/UserSignup";
+import AdminSignup from "./Pages/Auth/AdminSignup";
+import AdminDashboard from "./Pages/Admin/AdminDashboard";
+import AdminWorkspaces from "./Pages/Admin/AdminWorkspaces";
 import Footer from "./Component/Footer";
 import NotFound from "./Component/NotFound";
 import CreateWorkspace from "./Component/ListingForm";
@@ -27,8 +35,9 @@ import TestBookingManagement from "./Pages/TestBookingManagement/TestBookingMana
 import QuickBooking from "./Pages/QuickBooking/QuickBooking";
 import ScrollToTop from "./Component/ScrollToTop";
 import BackToTop from "./Component/BackToTop";
+import AuthenticatedRoute from "./Component/AuthenticatedRoute";
 
-const PageWrapper = ({ children, backgroundVariant = 'default' }) => (
+const PageWrapper = ({ children, backgroundVariant = "default" }) => (
   <BackgroundWrapper variant={backgroundVariant}>
     <ScrollToTop />
     <NavBar />
@@ -41,7 +50,15 @@ const PageWrapper = ({ children, backgroundVariant = 'default' }) => (
 const routes = [
   {
     path: "/",
-    element: <Home />,
+    element: <AuthenticatedRoute />,
+  },
+  {
+    path: "/workspaces",
+    element: <UserDashboard />,
+  },
+  {
+    path: "/welcome",
+    element: <Welcome />,
   },
   {
     path: "/new",
@@ -59,13 +76,39 @@ const routes = [
     path: "/bookings",
     element: <UserBookings />,
   },
+  // Legacy routes (redirect to new role-based routes)
   {
     path: "/login",
-    element: <Login />,
+    element: <UserLogin />,
   },
   {
     path: "/signup",
-    element: <Signup />,
+    element: <UserSignup />,
+  },
+  // New role-based auth routes
+  {
+    path: "/user/login",
+    element: <UserLogin />,
+  },
+  {
+    path: "/user/signup",
+    element: <UserSignup />,
+  },
+  {
+    path: "/admin/login",
+    element: <AdminLogin />,
+  },
+  {
+    path: "/admin/signup",
+    element: <AdminSignup />,
+  },
+  {
+    path: "/admin/dashboard",
+    element: <AdminDashboard />,
+  },
+  {
+    path: "/admin/workspaces",
+    element: <AdminWorkspaces />,
   },
   {
     path: "/about",
@@ -133,22 +176,33 @@ const routes = [
   },
 ];
 
-const authPath = ["/login", "/signup"];
+const authPath = [
+  "/login",
+  "/signup",
+  "/user/login",
+  "/user/signup",
+  "/admin/login",
+  "/admin/signup",
+];
 
 const getBackgroundVariant = (path) => {
-  if (authPath.includes(path)) return 'auth';
-  if (path.includes('/book/')) return 'booking';
-  if (path.includes('/workspace/')) return 'workspace';
-  return 'default';
+  if (authPath.includes(path)) return "auth";
+  if (path.includes("/book/")) return "booking";
+  if (path.includes("/workspace/")) return "workspace";
+  return "default";
+};
+
+const isWelcomePage = (path) => {
+  return path === "/" || path === "/welcome";
 };
 
 const router = createBrowserRouter(
   routes.map(({ path, element }) => ({
     path,
     element: authPath.includes(path) ? (
-      <BackgroundWrapper variant="auth">
-        {element}
-      </BackgroundWrapper>
+      <BackgroundWrapper variant="auth">{element}</BackgroundWrapper>
+    ) : isWelcomePage(path) ? (
+      element // Welcome page without navbar/footer wrapper
     ) : (
       <PageWrapper backgroundVariant={getBackgroundVariant(path)}>
         {element}

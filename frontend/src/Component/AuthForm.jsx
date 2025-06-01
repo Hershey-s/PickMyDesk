@@ -4,6 +4,7 @@ import { Snackbar, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 
 import googleLogo from "../assets/google-logo.webp";
 import axios from "axios";
@@ -17,10 +18,12 @@ export default function AuthForm({ formType }) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("user"); // Default to user
   const [isLoadding, setIsLoadding] = useState(false);
   const [serverError, setServerError] = useState("");
   const navigate = useNavigate();
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
+  const { login } = useUser();
   const {
     register,
     handleSubmit,
@@ -48,17 +51,26 @@ export default function AuthForm({ formType }) {
     try {
       setIsLoadding(true);
       setServerError(""); // Clear previous errors
-      const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5004";
       let url = formType === "login" ? "login" : "signup";
 
+      console.log("Environment VITE_API_URL:", import.meta.env.VITE_API_URL);
+      console.log("Using baseURL:", baseURL);
       console.log("Sending request to:", `${baseURL}/${url}`);
-      console.log("Data:", { username, email, password: "***" });
+      console.log("Data:", { username, email, password: "***", role });
 
-      let response = await axios.post(`${baseURL}/${url}`, {
+      let requestData = {
         username,
         email,
         password,
-      });
+      };
+
+      // Add role only for signup
+      if (formType === "signup") {
+        requestData.role = role;
+      }
+
+      let response = await axios.post(`${baseURL}/${url}`, requestData);
 
       console.log("Response:", response.data);
 
@@ -67,8 +79,9 @@ export default function AuthForm({ formType }) {
         setOpen(true);
       }
       if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
-        console.log("Token saved to localStorage");
+        // Use the login function from UserContext
+        login(response.data.token, response.data.user);
+        console.log("User logged in successfully");
         setTimeout(() => {
           navigate("/");
         }, 1000); // Small delay to show success message
@@ -94,7 +107,7 @@ export default function AuthForm({ formType }) {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     console.log("Client ID:", clientId);
 
-    if (!clientId || clientId === 'your_google_client_id_here') {
+    if (!clientId || clientId === "your_google_client_id_here") {
       setServerError("Google Client ID not configured properly.");
       return;
     }
@@ -105,9 +118,10 @@ export default function AuthForm({ formType }) {
         callback: async (response) => {
           console.log("Google response:", response);
           try {
-            const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+            const baseURL =
+              import.meta.env.VITE_API_URL || "http://localhost:5004";
             const result = await axios.post(`${baseURL}/auth/google`, {
-              token: response.credential
+              token: response.credential,
             });
 
             console.log("Backend response:", result.data);
@@ -122,24 +136,26 @@ export default function AuthForm({ formType }) {
             }
           } catch (error) {
             console.error("Google auth error:", error);
-            setServerError(error.response?.data?.message || "Google authentication failed");
+            setServerError(
+              error.response?.data?.message || "Google authentication failed"
+            );
           }
         },
         auto_select: false,
         cancel_on_tap_outside: true,
-        use_fedcm_for_prompt: false
+        use_fedcm_for_prompt: false,
       });
 
       // Try using renderButton instead of prompt for better compatibility
-      const buttonDiv = document.createElement('div');
-      buttonDiv.id = 'google-signin-button-temp';
+      const buttonDiv = document.createElement("div");
+      buttonDiv.id = "google-signin-button-temp";
       document.body.appendChild(buttonDiv);
 
       window.google.accounts.id.renderButton(buttonDiv, {
-        theme: 'outline',
-        size: 'large',
-        text: 'signin_with',
-        width: 300
+        theme: "outline",
+        size: "large",
+        text: "signin_with",
+        width: 300,
       });
 
       // Trigger click on the rendered button
@@ -150,7 +166,6 @@ export default function AuthForm({ formType }) {
         }
         document.body.removeChild(buttonDiv);
       }, 100);
-
     } catch (error) {
       console.error("Error initializing Google Sign-In:", error);
       setServerError("Failed to initialize Google Sign-In: " + error.message);
@@ -172,7 +187,11 @@ export default function AuthForm({ formType }) {
               ? "bg-gray-200 text-black hover:bg-gray-300 cursor-pointer"
               : "bg-gray-100 text-gray-400 cursor-not-allowed"
           }`}
-          title={!isGoogleLoaded ? "Loading Google services..." : "Sign in with Google"}
+          title={
+            !isGoogleLoaded
+              ? "Loading Google services..."
+              : "Sign in with Google"
+          }
         >
           <img
             src={googleLogo}
@@ -218,6 +237,30 @@ export default function AuthForm({ formType }) {
                     errorsMessage={errors.username.message}
                   />
                 )}
+              </div>
+            )}
+
+            {formType === "signup" && (
+              <div>
+                <label htmlFor="role" className="mb-1 font-medium">
+                  Account Type *
+                </label>
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="border border-gray-400 focus:outline-none w-full px-4 py-3 rounded-full bg-white/80 text-black
+                            transition-colors duration-300 hover:border-black focus:border-purple-800"
+                >
+                  <option value="user">User (Book Workspaces)</option>
+                  <option value="admin">
+                    Admin (Create & Manage Workspaces)
+                  </option>
+                </select>
+                <p className="text-sm mt-1 text-gray-600">
+                  {role === "user"
+                    ? "Choose this to book and use workspaces"
+                    : "Choose this to create and manage workspace listings"}
+                </p>
               </div>
             )}
 

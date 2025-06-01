@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom";
 import { formatPrice } from "../../utils/currency";
 import LocationMap from "../../Component/LocationMap";
 import AvailabilityCalendar from "../../Component/AvailabilityCalendar";
+import { useUser } from "../../context/UserContext";
 
 export default function ShowWorkspace() {
   const [loading, setLoading] = useState(true);
@@ -13,6 +14,7 @@ export default function ShowWorkspace() {
   const { id } = useParams();
   const [workspace, setWorkspace] = useState(null);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
+  const { isUser, isAdmin, isLoggedIn } = useUser();
 
   // Handle time slot selection from calendar
   const handleTimeSlotSelect = (timeSlot) => {
@@ -22,7 +24,7 @@ export default function ShowWorkspace() {
   useEffect(() => {
     const fetchWorkspaceDetails = async () => {
       setLoading(true);
-      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5004";
       try {
         const response = await axios.get(`${baseUrl}/workspaces/${id}`);
 
@@ -151,65 +153,96 @@ export default function ShowWorkspace() {
           </div>
         </div>
 
-        {/* Main Workspace Booking */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4">Book This Workspace</h2>
-          <div className="border border-gray-200 rounded-lg p-6">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-xl font-semibold">{workspace.title}</h3>
-                <p className="text-gray-600">
-                  {workspace.location}, {workspace.country}
-                </p>
-              </div>
-              <div className="text-right">
-                <span className="text-2xl font-bold text-purple-700">
-                  {formatPrice(workspace.price, workspace.currency || "INR")}
-                </span>
-                <span className="text-gray-500 ml-1">
-                  /{workspace.priceUnit}
-                </span>
-              </div>
-            </div>
-            <p className="text-gray-600 mb-4">{workspace.description}</p>
-            <Link
-              to={`/book/${workspace._id}`}
-              className="w-full bg-purple-700 hover:bg-purple-800 text-white py-3 rounded-lg font-medium text-center block"
-            >
-              Book Now -{" "}
-              {formatPrice(workspace.price, workspace.currency || "INR")} per{" "}
-              {workspace.priceUnit}
-            </Link>
-          </div>
-        </div>
-
-        {/* Availability Calendar */}
-        <AvailabilityCalendar
-          workspace={workspace}
-          onTimeSelect={handleTimeSlotSelect}
-        />
-
-        {/* Quick Book Button */}
-        {selectedTimeSlot && (
+        {/* Main Workspace Booking - Only show for users, not admins */}
+        {!isAdmin() && (
           <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold">Selected Time Slot</h3>
-                <p className="text-gray-600">
-                  {selectedTimeSlot.date.toLocaleDateString()} at{" "}
-                  {selectedTimeSlot.displayTime}
-                </p>
+            <h2 className="text-xl font-bold mb-4">Book This Workspace</h2>
+            <div className="border border-gray-200 rounded-lg p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-xl font-semibold">{workspace.title}</h3>
+                  <p className="text-gray-600">
+                    {workspace.location}, {workspace.country}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-2xl font-bold text-purple-700">
+                    {formatPrice(workspace.price, workspace.currency || "INR")}
+                  </span>
+                  <span className="text-gray-500 ml-1">
+                    /{workspace.priceUnit}
+                  </span>
+                </div>
               </div>
-              <Link
-                to={`/book/${workspace._id}?date=${
-                  selectedTimeSlot.date.toISOString().split("T")[0]
-                }&time=${selectedTimeSlot.time}`}
-                className="bg-purple-700 hover:bg-purple-800 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-              >
-                Book This Time
-              </Link>
+              <p className="text-gray-600 mb-4">{workspace.description}</p>
+              {isLoggedIn() ? (
+                <Link
+                  to={`/book/${workspace._id}`}
+                  className="w-full bg-purple-700 hover:bg-purple-800 text-white py-3 rounded-lg font-medium text-center block"
+                >
+                  Book Now -{" "}
+                  {formatPrice(workspace.price, workspace.currency || "INR")}{" "}
+                  per {workspace.priceUnit}
+                </Link>
+              ) : (
+                <Link
+                  to="/login"
+                  className="w-full bg-purple-700 hover:bg-purple-800 text-white py-3 rounded-lg font-medium text-center block"
+                >
+                  Login to Book This Workspace
+                </Link>
+              )}
             </div>
           </div>
+        )}
+
+        {/* Admin Message - Only show for admins */}
+        {isAdmin() && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6">
+            <h2 className="text-xl font-bold mb-2 text-yellow-800">
+              Admin View
+            </h2>
+            <p className="text-yellow-700">
+              You are viewing this workspace as an admin. Admins can create and
+              manage workspaces but cannot book them. Only users with "User"
+              accounts can make bookings.
+            </p>
+          </div>
+        )}
+
+        {/* Availability Calendar - Only show for users, not admins */}
+        {!isAdmin() && (
+          <>
+            <AvailabilityCalendar
+              workspace={workspace}
+              onTimeSelect={handleTimeSlotSelect}
+            />
+
+            {/* Quick Book Button */}
+            {selectedTimeSlot && (
+              <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold">
+                      Selected Time Slot
+                    </h3>
+                    <p className="text-gray-600">
+                      {selectedTimeSlot.date.toLocaleDateString()} at{" "}
+                      {selectedTimeSlot.displayTime}
+                    </p>
+                  </div>
+                  <Link
+                    to={`/book/${workspace._id}?date=${
+                      selectedTimeSlot.date.toISOString().split("T")[0]
+                    }&time=${selectedTimeSlot.time}`}
+                    className="bg-purple-700 hover:bg-purple-800 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                  >
+                    Book This Time
+                  </Link>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {/* Location */}

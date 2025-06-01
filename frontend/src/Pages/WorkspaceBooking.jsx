@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import BookingForm from "../Component/BookingForm";
 import { formatPrice } from "../utils/currency";
+import { formatTimeWithAMPM } from "../utils/timeFormat";
 
 export default function WorkspaceBooking() {
   const { id } = useParams();
@@ -23,7 +24,7 @@ export default function WorkspaceBooking() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5004";
 
   useEffect(() => {
     fetchWorkspaceDetails();
@@ -179,7 +180,9 @@ export default function WorkspaceBooking() {
                       <Typography key={day} variant="body2">
                         {day.charAt(0).toUpperCase() + day.slice(1)}:{" "}
                         {schedule.available
-                          ? `${schedule.start} - ${schedule.end}`
+                          ? `${formatTimeWithAMPM(
+                              schedule.start
+                            )} - ${formatTimeWithAMPM(schedule.end)}`
                           : "Closed"}
                       </Typography>
                     )

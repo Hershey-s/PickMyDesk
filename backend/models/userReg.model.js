@@ -28,6 +28,12 @@ const userSchema = new Schema({
   profilePicture: {
     type: String,
   },
+  role: {
+    type: String,
+    enum: ["user", "admin"],
+    default: "user",
+    required: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

@@ -26,13 +26,38 @@ function Home() {
     const fetchWorkspaces = async () => {
       try {
         setLoading(true);
-        const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-        console.log(baseUrl);
+        const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5004";
+        console.log("🔍 Fetching public workspaces from:", baseUrl);
+
+        // Use regular endpoint and filter on frontend
         const response = await axios.get(`${baseUrl}/workspaces`);
-        setWorkspaces(response.data);
-        setFilteredWorkspaces(response.data);
+        console.log("✅ Fetched all workspaces:", response.data.length);
+
+        // Filter out admin/test workspaces for public discovery
+        const publicWorkspaces = response.data.filter((workspace) => {
+          // Exclude workspaces with test/admin/sample in title (case insensitive)
+          const hasTestTitle = /test|admin|sample/i.test(workspace.title || "");
+
+          // Only include workspaces with proper data
+          const hasValidData =
+            workspace.listingImage &&
+            workspace.price > 0 &&
+            workspace.description &&
+            workspace.location;
+
+          return !hasTestTitle && hasValidData;
+        });
+
+        console.log(
+          "🔍 Filtered to public workspaces:",
+          publicWorkspaces.length
+        );
+
+        setWorkspaces(publicWorkspaces);
+        setFilteredWorkspaces(publicWorkspaces);
         setError(null);
       } catch (err) {
+        console.error("❌ Error fetching public workspaces:", err);
         setError("Failed to fetch workspaces. Please try again later.");
       } finally {
         setLoading(false);

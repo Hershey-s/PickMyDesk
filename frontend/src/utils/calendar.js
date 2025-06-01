@@ -10,17 +10,17 @@ export const getCalendarData = (year, month) => {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   const startDate = new Date(firstDay);
-  
+
   // Start from Sunday of the week containing the first day
   startDate.setDate(startDate.getDate() - startDate.getDay());
-  
+
   const endDate = new Date(lastDay);
   // End on Saturday of the week containing the last day
   endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
-  
+
   const dates = [];
   const currentDate = new Date(startDate);
-  
+
   while (currentDate <= endDate) {
     dates.push({
       date: new Date(currentDate),
@@ -30,22 +30,22 @@ export const getCalendarData = (year, month) => {
       isCurrentMonth: currentDate.getMonth() === month,
       isToday: isToday(currentDate),
       isPast: isPast(currentDate),
-      dateString: formatDateForAPI(currentDate)
+      dateString: formatDateForAPI(currentDate),
     });
     currentDate.setDate(currentDate.getDate() + 1);
   }
-  
+
   return {
     dates,
     monthName: getMonthName(month),
     year,
-    month
+    month,
   };
 };
 
 /**
  * Check if a date is today
- * @param {Date} date 
+ * @param {Date} date
  * @returns {boolean}
  */
 export const isToday = (date) => {
@@ -55,7 +55,7 @@ export const isToday = (date) => {
 
 /**
  * Check if a date is in the past
- * @param {Date} date 
+ * @param {Date} date
  * @returns {boolean}
  */
 export const isPast = (date) => {
@@ -66,11 +66,11 @@ export const isPast = (date) => {
 
 /**
  * Format date for API calls (YYYY-MM-DD)
- * @param {Date} date 
+ * @param {Date} date
  * @returns {string}
  */
 export const formatDateForAPI = (date) => {
-  return date.toISOString().split('T')[0];
+  return date.toISOString().split("T")[0];
 };
 
 /**
@@ -80,8 +80,18 @@ export const formatDateForAPI = (date) => {
  */
 export const getMonthName = (month) => {
   const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
   return months[month];
 };
@@ -94,32 +104,32 @@ export const getMonthName = (month) => {
  */
 export const generateTimeSlots = (workspace, selectedDate) => {
   if (!workspace.availability || !selectedDate) return [];
-  
+
   const dayName = getDayName(selectedDate.getDay());
   const dayAvailability = workspace.availability[dayName];
-  
+
   if (!dayAvailability || !dayAvailability.available) {
     return [];
   }
-  
+
   const slots = [];
-  const startTime = dayAvailability.start || '09:00';
-  const endTime = dayAvailability.end || '18:00';
-  
+  const startTime = dayAvailability.start || "09:00";
+  const endTime = dayAvailability.end || "18:00";
+
   // Generate hourly slots
   const start = parseTime(startTime);
   const end = parseTime(endTime);
-  
+
   for (let hour = start; hour < end; hour++) {
     const timeString = formatTime(hour);
     slots.push({
       time: timeString,
       hour: hour,
       available: true, // Will be updated based on bookings
-      displayTime: formatDisplayTime(hour)
+      displayTime: formatDisplayTime(hour),
     });
   }
-  
+
   return slots;
 };
 
@@ -129,7 +139,15 @@ export const generateTimeSlots = (workspace, selectedDate) => {
  * @returns {string}
  */
 export const getDayName = (dayNumber) => {
-  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const days = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
   return days[dayNumber];
 };
 
@@ -139,7 +157,7 @@ export const getDayName = (dayNumber) => {
  * @returns {number}
  */
 export const parseTime = (timeString) => {
-  const [hours] = timeString.split(':');
+  const [hours] = timeString.split(":");
   return parseInt(hours, 10);
 };
 
@@ -149,19 +167,20 @@ export const parseTime = (timeString) => {
  * @returns {string}
  */
 export const formatTime = (hour) => {
-  return `${hour.toString().padStart(2, '0')}:00`;
+  return `${hour.toString().padStart(2, "0")}:00`;
 };
 
 /**
- * Format hour for display (12-hour format)
+ * Format hour for display (24-hour format with AM/PM indicator)
  * @param {number} hour - Hour number (24-hour format)
  * @returns {string}
  */
 export const formatDisplayTime = (hour) => {
-  if (hour === 0) return '12:00 AM';
-  if (hour === 12) return '12:00 PM';
-  if (hour < 12) return `${hour}:00 AM`;
-  return `${hour - 12}:00 PM`;
+  const time24 = `${hour.toString().padStart(2, "0")}:00`;
+  const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  const ampm = hour >= 12 ? "PM" : "AM";
+  const time12 = `${hour12}:00 ${ampm}`;
+  return `${time24} (${time12})`;
 };
 
 /**
@@ -173,12 +192,16 @@ export const formatDisplayTime = (hour) => {
  */
 export const isTimeSlotBooked = (bookings, date, time) => {
   if (!bookings || bookings.length === 0) return false;
-  
-  return bookings.some(booking => {
-    const bookingStart = new Date(`${booking.startDate}T${booking.startTime || '00:00'}`);
-    const bookingEnd = new Date(`${booking.endDate}T${booking.endTime || '23:59'}`);
+
+  return bookings.some((booking) => {
+    const bookingStart = new Date(
+      `${booking.startDate}T${booking.startTime || "00:00"}`
+    );
+    const bookingEnd = new Date(
+      `${booking.endDate}T${booking.endTime || "23:59"}`
+    );
     const slotTime = new Date(`${date}T${time}`);
-    
+
     return slotTime >= bookingStart && slotTime < bookingEnd;
   });
 };

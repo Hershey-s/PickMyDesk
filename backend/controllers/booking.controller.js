@@ -21,7 +21,7 @@ export const createBooking = async (req, res) => {
       endTime,
       guestCount,
       specialRequests,
-      contactInfo
+      contactInfo,
     } = req.body;
 
     const userId = req.user.userId;
@@ -44,18 +44,22 @@ export const createBooking = async (req, res) => {
     const now = new Date();
 
     if (start < now) {
-      return res.status(400).json({ message: "Start date cannot be in the past" });
+      return res
+        .status(400)
+        .json({ message: "Start date cannot be in the past" });
     }
 
     if (end <= start) {
-      return res.status(400).json({ message: "End date must be after start date" });
+      return res
+        .status(400)
+        .json({ message: "End date must be after start date" });
     }
 
     // Calculate duration and total price
     let duration;
-    if (workspace.priceUnit === 'hour' && startTime && endTime) {
-      const startHour = parseInt(startTime.split(':')[0]);
-      const endHour = parseInt(endTime.split(':')[0]);
+    if (workspace.priceUnit === "hour" && startTime && endTime) {
+      const startHour = parseInt(startTime.split(":")[0]);
+      const endHour = parseInt(endTime.split(":")[0]);
       duration = endHour - startHour;
     } else {
       duration = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
@@ -75,14 +79,15 @@ export const createBooking = async (req, res) => {
       guestCount: guestCount || 1,
       specialRequests,
       contactInfo,
-      status: workspace.instantBooking ? "confirmed" : "pending"
+      status: workspace.instantBooking ? "confirmed" : "pending",
     });
 
     // Check for conflicts
     const hasConflict = await booking.hasConflict();
     if (hasConflict) {
       return res.status(409).json({
-        message: "This time slot is already booked. Please choose different dates/times."
+        message:
+          "This time slot is already booked. Please choose different dates/times.",
       });
     }
 
@@ -90,22 +95,21 @@ export const createBooking = async (req, res) => {
 
     // Populate workspace and user details
     await booking.populate([
-      { path: 'workspace', select: 'title location price priceUnit' },
-      { path: 'user', select: 'username email' }
+      { path: "workspace", select: "title location price priceUnit" },
+      { path: "user", select: "username email" },
     ]);
 
     res.status(201).json({
       message: "Booking created successfully",
-      booking
+      booking,
     });
-
   } catch (error) {
     console.error("❌ Create booking error:", error);
     console.error("Error stack:", error.stack);
     res.status(500).json({
       message: "Failed to create booking",
       error: error.message,
-      details: error.stack
+      details: error.stack,
     });
   }
 };
@@ -122,7 +126,10 @@ export const getUserBookings = async (req, res) => {
     }
 
     const bookings = await Booking.find(query)
-      .populate('workspace', 'title location listingImage price priceUnit currency')
+      .populate(
+        "workspace",
+        "title location listingImage price priceUnit currency"
+      )
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
@@ -133,12 +140,13 @@ export const getUserBookings = async (req, res) => {
       bookings,
       totalPages: Math.ceil(total / limit),
       currentPage: page,
-      total
+      total,
     });
-
   } catch (error) {
     console.error("Get user bookings error:", error);
-    res.status(500).json({ message: "Failed to fetch bookings", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch bookings", error: error.message });
   }
 };
 
@@ -149,20 +157,29 @@ export const getWorkspaceBookings = async (req, res) => {
     const userId = req.user.userId;
 
     // Verify user owns the workspace
-    const workspace = await Workspace.findOne({ _id: workspaceId, owner: userId });
+    const workspace = await Workspace.findOne({
+      _id: workspaceId,
+      owner: userId,
+    });
     if (!workspace) {
-      return res.status(403).json({ message: "Access denied. You don't own this workspace." });
+      return res
+        .status(403)
+        .json({ message: "Access denied. You don't own this workspace." });
     }
 
     const bookings = await Booking.find({ workspace: workspaceId })
-      .populate('user', 'username email')
+      .populate("user", "username email")
       .sort({ startDate: 1 });
 
     res.status(200).json({ bookings });
-
   } catch (error) {
     console.error("Get workspace bookings error:", error);
-    res.status(500).json({ message: "Failed to fetch workspace bookings", error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "Failed to fetch workspace bookings",
+        error: error.message,
+      });
   }
 };
 
@@ -173,23 +190,30 @@ export const getBookingById = async (req, res) => {
     const userId = req.user.userId;
 
     const booking = await Booking.findById(bookingId)
-      .populate('workspace', 'title location listingImage price priceUnit owner')
-      .populate('user', 'username email');
+      .populate(
+        "workspace",
+        "title location listingImage price priceUnit owner"
+      )
+      .populate("user", "username email");
 
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
     }
 
     // Check if user is the booking owner or workspace owner
-    if (booking.user._id.toString() !== userId && booking.workspace.owner.toString() !== userId) {
+    if (
+      booking.user._id.toString() !== userId &&
+      booking.workspace.owner.toString() !== userId
+    ) {
       return res.status(403).json({ message: "Access denied" });
     }
 
     res.status(200).json({ booking });
-
   } catch (error) {
     console.error("Get booking error:", error);
-    res.status(500).json({ message: "Failed to fetch booking", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch booking", error: error.message });
   }
 };
 
@@ -199,7 +223,7 @@ export const updateBookingStatus = async (req, res) => {
     console.log("🔄 Update booking status request:", {
       bookingId: req.params.bookingId,
       body: req.body,
-      userId: req.user.userId
+      userId: req.user.userId,
     });
 
     const { bookingId } = req.params;
@@ -211,7 +235,7 @@ export const updateBookingStatus = async (req, res) => {
       return res.status(400).json({ message: "Status is required" });
     }
 
-    const booking = await Booking.findById(bookingId).populate('workspace');
+    const booking = await Booking.findById(bookingId).populate("workspace");
     if (!booking) {
       console.log("❌ Booking not found:", bookingId);
       return res.status(404).json({ message: "Booking not found" });
@@ -221,7 +245,7 @@ export const updateBookingStatus = async (req, res) => {
       id: booking._id,
       currentStatus: booking.status,
       user: booking.user,
-      workspace: booking.workspace?._id
+      workspace: booking.workspace?._id,
     });
 
     // Check permissions - simplified for booking owner
@@ -229,7 +253,7 @@ export const updateBookingStatus = async (req, res) => {
     console.log("🔐 Permission check:", {
       bookingUser: booking.user.toString(),
       currentUser: userId,
-      isBookingOwner
+      isBookingOwner,
     });
 
     if (!isBookingOwner) {
@@ -241,35 +265,45 @@ export const updateBookingStatus = async (req, res) => {
           return res.status(403).json({ message: "Access denied" });
         }
       } else {
-        console.log("❌ Access denied - not booking owner and no workspace owner");
+        console.log(
+          "❌ Access denied - not booking owner and no workspace owner"
+        );
         return res.status(403).json({ message: "Access denied" });
       }
     }
 
     // Validate status transitions
     const validTransitions = {
-      pending: ['confirmed', 'cancelled'],
-      confirmed: ['cancelled', 'completed'],
+      pending: ["confirmed", "cancelled"],
+      confirmed: ["cancelled", "completed"],
       cancelled: [], // Cannot change from cancelled
-      completed: [] // Cannot change from completed
+      completed: [], // Cannot change from completed
     };
 
-    if (!validTransitions[booking.status] || !validTransitions[booking.status].includes(status)) {
+    if (
+      !validTransitions[booking.status] ||
+      !validTransitions[booking.status].includes(status)
+    ) {
       console.log("❌ Invalid status transition:", {
         from: booking.status,
         to: status,
-        validOptions: validTransitions[booking.status]
+        validOptions: validTransitions[booking.status],
       });
       return res.status(400).json({
         message: `Cannot change status from ${booking.status} to ${status}`,
-        validTransitions: validTransitions[booking.status]
+        validTransitions: validTransitions[booking.status],
       });
     }
 
     // Update booking
-    console.log("✅ Updating booking status from", booking.status, "to", status);
+    console.log(
+      "✅ Updating booking status from",
+      booking.status,
+      "to",
+      status
+    );
     booking.status = status;
-    if (status === 'cancelled' && cancellationReason) {
+    if (status === "cancelled" && cancellationReason) {
       booking.cancellationReason = cancellationReason;
     }
 
@@ -278,15 +312,14 @@ export const updateBookingStatus = async (req, res) => {
 
     res.status(200).json({
       message: "Booking status updated successfully",
-      booking: updatedBooking
+      booking: updatedBooking,
     });
-
   } catch (error) {
     console.error("❌ Update booking status error:", error);
     res.status(500).json({
       message: "Failed to update booking status",
       error: error.message,
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      details: process.env.NODE_ENV === "development" ? error.stack : undefined,
     });
   }
 };
@@ -297,7 +330,7 @@ export const rescheduleBooking = async (req, res) => {
     console.log("🔄 Reschedule booking request:", {
       bookingId: req.params.bookingId,
       body: req.body,
-      userId: req.user.userId
+      userId: req.user.userId,
     });
 
     const { bookingId } = req.params;
@@ -306,10 +339,12 @@ export const rescheduleBooking = async (req, res) => {
 
     // Validate required fields
     if (!startDate || !endDate) {
-      return res.status(400).json({ message: "Start date and end date are required" });
+      return res
+        .status(400)
+        .json({ message: "Start date and end date are required" });
     }
 
-    const booking = await Booking.findById(bookingId).populate('workspace');
+    const booking = await Booking.findById(bookingId).populate("workspace");
     if (!booking) {
       console.log("❌ Booking not found:", bookingId);
       return res.status(404).json({ message: "Booking not found" });
@@ -319,7 +354,7 @@ export const rescheduleBooking = async (req, res) => {
       id: booking._id,
       currentStatus: booking.status,
       user: booking.user,
-      workspace: booking.workspace?._id
+      workspace: booking.workspace?._id,
     });
 
     // Check if user owns the booking
@@ -329,55 +364,64 @@ export const rescheduleBooking = async (req, res) => {
     }
 
     // Check if booking can be rescheduled
-    if (booking.status === 'cancelled' || booking.status === 'completed') {
-      return res.status(400).json({ message: "Cannot reschedule cancelled or completed bookings" });
+    if (booking.status === "cancelled" || booking.status === "completed") {
+      return res
+        .status(400)
+        .json({ message: "Cannot reschedule cancelled or completed bookings" });
     }
 
     // Check if new dates are in the future
     const newStart = new Date(startDate);
     const now = new Date();
     if (newStart < now) {
-      return res.status(400).json({ message: "New start date cannot be in the past" });
+      return res
+        .status(400)
+        .json({ message: "New start date cannot be in the past" });
     }
 
     // Check for conflicts with new dates/times (excluding current booking)
     const conflictingBookings = await Booking.find({
       _id: { $ne: bookingId }, // Exclude current booking
       workspace: booking.workspace._id,
-      status: { $in: ['confirmed', 'pending'] },
+      status: { $in: ["confirmed", "pending"] },
       $or: [
         {
           $and: [
             { startDate: { $lte: new Date(endDate) } },
-            { endDate: { $gte: new Date(startDate) } }
-          ]
-        }
-      ]
+            { endDate: { $gte: new Date(startDate) } },
+          ],
+        },
+      ],
     });
 
     // For hourly bookings, check time conflicts
-    if (booking.workspace.priceUnit === "hour" && startTime && endTime && conflictingBookings.length > 0) {
-      const timeConflicts = conflictingBookings.filter(b => {
+    if (
+      booking.workspace.priceUnit === "hour" &&
+      startTime &&
+      endTime &&
+      conflictingBookings.length > 0
+    ) {
+      const timeConflicts = conflictingBookings.filter((b) => {
         if (b.startTime && b.endTime) {
-          return (startTime < b.endTime && endTime > b.startTime);
+          return startTime < b.endTime && endTime > b.startTime;
         }
         return true;
       });
 
       if (timeConflicts.length > 0) {
         return res.status(409).json({
-          message: "The new time slot is already booked"
+          message: "The new time slot is already booked",
         });
       }
     } else if (conflictingBookings.length > 0) {
       return res.status(409).json({
-        message: "The new dates are already booked"
+        message: "The new dates are already booked",
       });
     }
 
     // Calculate new total price
     let duration;
-    if (booking.workspace.priceUnit === 'hour' && startTime && endTime) {
+    if (booking.workspace.priceUnit === "hour" && startTime && endTime) {
       const start = new Date(`2000-01-01T${startTime}`);
       const end = new Date(`2000-01-01T${endTime}`);
       duration = (end - start) / (1000 * 60 * 60);
@@ -404,12 +448,85 @@ export const rescheduleBooking = async (req, res) => {
 
     res.status(200).json({
       message: "Booking rescheduled successfully",
-      booking
+      booking,
     });
-
   } catch (error) {
     console.error("Reschedule booking error:", error);
-    res.status(500).json({ message: "Failed to reschedule booking", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to reschedule booking", error: error.message });
+  }
+};
+
+// Cancel a booking (Users can cancel their own bookings)
+export const cancelBooking = async (req, res) => {
+  try {
+    console.log("🚫 Cancel booking request:", {
+      bookingId: req.params.bookingId,
+      userId: req.user.userId,
+      body: req.body,
+    });
+
+    const { bookingId } = req.params;
+    const { cancellationReason } = req.body;
+    const userId = req.user.userId;
+
+    const booking = await Booking.findById(bookingId).populate("workspace");
+    if (!booking) {
+      console.log("❌ Booking not found:", bookingId);
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    console.log("📝 Found booking for cancellation:", {
+      id: booking._id,
+      currentStatus: booking.status,
+      user: booking.user,
+      workspace: booking.workspace?._id,
+    });
+
+    // Check if user owns the booking
+    if (booking.user.toString() !== userId) {
+      console.log("❌ Access denied - not booking owner");
+      return res
+        .status(403)
+        .json({
+          message: "Access denied. You can only cancel your own bookings.",
+        });
+    }
+
+    // Check if booking can be cancelled
+    if (booking.status === "cancelled") {
+      return res.status(400).json({ message: "Booking is already cancelled" });
+    }
+
+    if (booking.status === "completed") {
+      return res
+        .status(400)
+        .json({ message: "Cannot cancel completed bookings" });
+    }
+
+    // Update booking status to cancelled
+    console.log("✅ Cancelling booking:", booking._id);
+    booking.status = "cancelled";
+    if (cancellationReason) {
+      booking.cancellationReason = cancellationReason;
+    }
+    booking.updatedAt = new Date();
+
+    const updatedBooking = await booking.save();
+    console.log("✅ Booking cancelled successfully:", updatedBooking._id);
+
+    res.status(200).json({
+      message: "Booking cancelled successfully",
+      booking: updatedBooking,
+    });
+  } catch (error) {
+    console.error("❌ Cancel booking error:", error);
+    res.status(500).json({
+      message: "Failed to cancel booking",
+      error: error.message,
+      details: process.env.NODE_ENV === "development" ? error.stack : undefined,
+    });
   }
 };
 
@@ -428,7 +545,11 @@ export const checkAvailability = async (req, res) => {
     const end = new Date(endDate);
 
     // Get existing bookings for the date range
-    const existingBookings = await Booking.getAvailability(workspaceId, start, end);
+    const existingBookings = await Booking.getAvailability(
+      workspaceId,
+      start,
+      end
+    );
 
     // Check if the specific time slot is available
     let isAvailable = true;
@@ -438,7 +559,13 @@ export const checkAvailability = async (req, res) => {
       // Check date overlap
       if (booking.startDate <= end && booking.endDate >= start) {
         // If it's hourly booking, also check time overlap
-        if (workspace.priceUnit === 'hour' && startTime && endTime && booking.startTime && booking.endTime) {
+        if (
+          workspace.priceUnit === "hour" &&
+          startTime &&
+          endTime &&
+          booking.startTime &&
+          booking.endTime
+        ) {
           if (booking.startTime < endTime && booking.endTime > startTime) {
             isAvailable = false;
             conflictingBookings.push(booking);
@@ -452,17 +579,18 @@ export const checkAvailability = async (req, res) => {
 
     res.status(200).json({
       available: isAvailable,
-      conflictingBookings: conflictingBookings.map(b => ({
+      conflictingBookings: conflictingBookings.map((b) => ({
         startDate: b.startDate,
         endDate: b.endDate,
         startTime: b.startTime,
         endTime: b.endTime,
-        status: b.status
-      }))
+        status: b.status,
+      })),
     });
-
   } catch (error) {
     console.error("Check availability error:", error);
-    res.status(500).json({ message: "Failed to check availability", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to check availability", error: error.message });
   }
 };

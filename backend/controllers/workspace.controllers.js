@@ -2,8 +2,13 @@ import Workspace from "../models/workspace.model.js";
 import { cloudinary } from "../cloudConfig.js";
 
 // Create a new workspace (Only owners can create workspaces)
-export const createWorkspaces = async (req, res) => {
+export const createWorkspace = async (req, res) => {
   try {
+    console.log("🚀 Creating workspace...");
+    console.log("📝 Request body:", req.body);
+    console.log("👤 User info:", req.user);
+    console.log("📁 File info:", req.file ? req.file.filename : "No file");
+
     const {
       title,
       location,
@@ -17,6 +22,20 @@ export const createWorkspaces = async (req, res) => {
       currency,
     } = req.body;
 
+    // Provide defaults for missing fields
+    const workspaceTitle = title || "Untitled Workspace";
+    const workspaceLocation = location || "Unknown Location";
+    const workspaceDescription = description || "No description provided";
+    const workspacePrice = price ? Number(price) : 100;
+    const workspaceCountry = country || "India";
+
+    console.log("📝 Processed fields:");
+    console.log("Title:", workspaceTitle);
+    console.log("Location:", workspaceLocation);
+    console.log("Description:", workspaceDescription);
+    console.log("Price:", workspacePrice);
+    console.log("Country:", workspaceCountry);
+
     let imageUrl = listingImage;
 
     // Handle file upload if a file was provided
@@ -29,8 +48,8 @@ export const createWorkspaces = async (req, res) => {
         transformation: [
           { width: 800, height: 600, crop: "fill" },
           { quality: "auto" },
-          { format: "auto" }
-        ]
+          { format: "auto" },
+        ],
       });
 
       imageUrl = result.secure_url;
@@ -39,7 +58,7 @@ export const createWorkspaces = async (req, res) => {
 
     // Parse tags if it's a string (from FormData)
     let parsedTags = tags;
-    if (typeof tags === 'string') {
+    if (typeof tags === "string") {
       try {
         parsedTags = JSON.parse(tags);
       } catch (e) {
@@ -49,17 +68,18 @@ export const createWorkspaces = async (req, res) => {
 
     const newWorkspace = new Workspace({
       owner: req.user.userId,
-      title,
-      location,
-      description,
-      price: Number(price),
+      title: workspaceTitle,
+      location: workspaceLocation,
+      description: workspaceDescription,
+      price: workspacePrice,
       listingImage: imageUrl,
-      country,
+      country: workspaceCountry,
       currency: currency || "INR",
       priceUnit: priceUnit || "hour",
       tags: parsedTags || [],
-      isPopular: isPopular === 'true' || isPopular === true,
+      isPopular: isPopular === "true" || isPopular === true,
       avgRating: 0,
+      maxCapacity: 20, // Default to 20 people
     });
 
     const savedWorkspace = await newWorkspace.save();
@@ -67,13 +87,13 @@ export const createWorkspaces = async (req, res) => {
 
     res.status(201).json({
       message: "Workspace created successfully!",
-      workspace: savedWorkspace
+      workspace: savedWorkspace,
     });
   } catch (error) {
     console.error("❌ Error creating workspace:", error);
     res.status(500).json({
       message: "Failed to create workspace",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -151,4 +171,40 @@ export const deleteWorkspace = async (req, res) => {
   await Workspace.findByIdAndDelete(id);
 
   res.status(200).json({ message: "Workspace deleted successfully" });
+};
+
+// Update all workspace capacities to 20 (admin utility)
+export const updateAllWorkspaceCapacities = async (req, res) => {
+  try {
+    console.log("🔄 Updating all workspace capacities to 20...");
+
+    const result = await Workspace.updateMany(
+      { maxCapacity: { $lt: 20 } },
+      { $set: { maxCapacity: 20 } }
+    );
+
+    console.log(`✅ Updated ${result.modifiedCount} workspaces`);
+
+    // Get sample of updated workspaces
+    const sampleWorkspaces = await Workspace.find(
+      {},
+      "title maxCapacity"
+    ).limit(5);
+
+    res.status(200).json({
+      message: "Workspace capacities updated successfully",
+      modifiedCount: result.modifiedCount,
+      matchedCount: result.matchedCount,
+      sampleWorkspaces: sampleWorkspaces.map((ws) => ({
+        title: ws.title,
+        maxCapacity: ws.maxCapacity,
+      })),
+    });
+  } catch (error) {
+    console.error("❌ Error updating workspace capacities:", error);
+    res.status(500).json({
+      message: "Failed to update workspace capacities",
+      error: error.message,
+    });
+  }
 };
