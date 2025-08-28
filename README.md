@@ -1,4 +1,4 @@
-# 🏢 PickMyDesk - Workspace Booking Platform
+#  PickMyDesk - Workspace Booking Platform
 
 **Tagline:** *Desk booking, simplified*
 
@@ -9,27 +9,27 @@ A complete workspace booking platform built with React and Node.js, featuring re
 ![Node.js](https://img.shields.io/badge/Node.js-18.x-green)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Latest-green)
 
-## ✨ Features
+##  Features
 
-### 🎯 Core Functionality
+###  Core Functionality
 - **Complete Booking System** - Create, view, cancel, and reschedule bookings
 - **Real-time Availability** - Live workspace availability checking
 - **User Authentication** - Secure JWT-based login system
 - **Google OAuth Integration** - Quick sign-in with Google
 - **Booking Management** - Comprehensive booking dashboard
 
-### 🌍 Localization
+###  Localization
 - **Indian Market Focus** - INR currency and Indian cities
 - **International Phone Support** - Country code validation (+91 for India)
 - **Professional UI/UX** - Clean, modern interface
 
-### 🔧 Technical Features
+###  Technical Features
 - **Conflict Prevention** - Automatic double-booking prevention
 - **Email Notifications** - Booking confirmation and updates
 - **Responsive Design** - Works on all devices
 - **Error Handling** - Comprehensive validation and error management
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 - Node.js 18+
@@ -83,16 +83,16 @@ npm run dev
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:5002
 
-## 📱 Pages & Features
+##  Pages & Features
 
-- **🏠 Homepage** - Browse available workspaces
-- **📝 Booking Form** - Create new bookings with validation
-- **📋 My Bookings** - View, cancel, and reschedule bookings
-- **👤 Authentication** - Login/Signup with Google OAuth
-- **ℹ️ About/Contact** - Professional company pages
-- **❓ FAQ & Support** - Help and documentation
+- ** Homepage** - Browse available workspaces
+- ** Booking Form** - Create new bookings with validation
+- ** My Bookings** - View, cancel, and reschedule bookings
+- ** Authentication** - Login/Signup with Google OAuth
+- **ℹ About/Contact** - Professional company pages
+- ** FAQ & Support** - Help and documentation
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 ### Frontend
 - **React 18** - Modern UI framework
@@ -109,14 +109,14 @@ npm run dev
 - **JWT** - Authentication
 - **bcryptjs** - Password hashing
 
-## 🔐 Authentication
+##  Authentication
 
 - JWT-based authentication system
 - Google OAuth integration
 - Secure password hashing
 - Token-based API protection
 
-## 👨‍💻 Developer
+## Developer
 
 **Developed by:** [Hershey-s](https://github.com/Hershey-s)
 
